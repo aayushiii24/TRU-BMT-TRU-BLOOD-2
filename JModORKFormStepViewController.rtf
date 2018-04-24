@@ -1,0 +1,895 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf830
+{\fonttbl\f0\fnil\fcharset0 Menlo-Regular;\f1\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red255\green255\blue255;\red92\green38\blue153;
+\red46\green13\blue110;\red196\green26\blue22;\red170\green13\blue145;\red63\green110\blue116;\red38\green71\blue75;
+\red100\green56\blue32;\red28\green0\blue207;\red0\green116\blue0;}
+{\*\expandedcolortbl;;\csgenericrgb\c0\c0\c0;\csgenericrgb\c100000\c100000\c100000;\csgenericrgb\c35900\c14900\c60100;
+\csgenericrgb\c18100\c5200\c43100;\csgenericrgb\c77000\c10200\c8600;\csgenericrgb\c66500\c5200\c56900;\csgenericrgb\c24700\c43100\c45600;\csgenericrgb\c14900\c27800\c29400;
+\csgenericrgb\c39100\c22000\c12500;\csgenericrgb\c11000\c0\c81000;\csgenericrgb\c0\c45600\c0;}
+\margl1440\margr1440\vieww9000\viewh8400\viewkind0
+\deftab692
+\pard\tx692\pardeftab692\pardirnatural\partightenfactor0
+
+\f0\fs28 \cf2 \cb3 - (\cf4 UITableViewCell\cf2  *)tableView:(\cf4 UITableView\cf2  *)tableView cellForRowAtIndexPath:(\cf4 NSIndexPath\cf2  *)indexPath \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2     \cf4 NSString\cf2  *identifier = [\cf4 NSString\cf2  \cf5 stringWithFormat\cf2 :\cf6 @"%ld-%ld"\cf2 ,(\cf7 long\cf2 )indexPath.\cf4 section\cf2 , (\cf7 long\cf2 )indexPath.\cf4 row\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2     
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2     \cf4 UITableViewCell\cf2  *cell = [tableView \cf5 dequeueReusableCellWithIdentifier\cf2 :identifier];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2     
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2     \cf7 if\cf2  (cell == \cf7 nil\cf2 ) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf8 ORKTableSection\cf2  *section = (\cf8 ORKTableSection\cf2  *)\cf8 _sections\cf2 [indexPath.\cf4 section\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf8 ORKTableCellItem\cf2  *cellItem = [section \cf9 items\cf2 ][indexPath.\cf4 row\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf8 ORKFormItem\cf2  *formItem = cellItem.\cf8 formItem\cf2 ;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf7 id\cf2  answer = \cf8 _savedAnswers\cf2 [formItem.\cf8 identifier\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf7 if\cf2  (section.\cf8 textChoiceCellGroup\cf2 ) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             [section.\cf8 textChoiceCellGroup\cf2  \cf9 setAnswer\cf2 :answer];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             cell = [section.\cf8 textChoiceCellGroup\cf2  \cf9 cellAtIndexPath\cf2 :indexPath \cf9 withReuseIdentifier\cf2 :identifier];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \} \cf7 else\cf2  \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf8 ORKAnswerFormat\cf2  *answerFormat = [cellItem.\cf8 formItem\cf2  \cf9 impliedAnswerFormat\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf8 ORKQuestionType\cf2  type = answerFormat.\cf8 questionType\cf2 ;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf8 Class\cf2  class = \cf7 nil\cf2 ;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf7 switch\cf2  (type) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                 \cf7 case\cf2  \cf9 ORKQuestionTypeSingleChoice\cf2 :
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                 \cf7 case\cf2  \cf9 ORKQuestionTypeMultipleChoice\cf2 : \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     \cf7 if\cf2  ([formItem.\cf9 impliedAnswerFormat\cf2  \cf5 isKindOfClass\cf2 :[\cf8 ORKImageChoiceAnswerFormat\cf2  \cf5 class\cf2 ]]) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                         class = [\cf8 ORKFormItemImageSelectionCell\cf2  \cf5 class\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     \} \cf7 else\cf2  \cf7 if\cf2  ([formItem.\cf9 impliedAnswerFormat\cf2  \cf5 isKindOfClass\cf2 :[\cf8 ORKValuePickerAnswerFormat\cf2  \cf5 class\cf2 ]]) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                         class = [\cf8 ORKFormItemPickerCell\cf2  \cf5 class\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     \cf7 break\cf2 ;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                 \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                 \cf7 case\cf2  \cf9 ORKQuestionTypeDateAndTime\cf2 :
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                 \cf7 case\cf2  \cf9 ORKQuestionTypeDate\cf2 :
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                 \cf7 case\cf2  \cf9 ORKQuestionTypeTimeOfDay\cf2 :
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                 \cf7 case\cf2  \cf9 ORKQuestionTypeTimeInterval\cf2 :
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                 \cf7 case\cf2  \cf9 ORKQuestionTypeHeight\cf2 : \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     class = [\cf8 ORKFormItemPickerCell\cf2  \cf5 class\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     \cf7 break\cf2 ;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                 \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                 \cf7 case\cf2  \cf9 ORKQuestionTypeDecimal\cf2 :
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                 \cf7 case\cf2  \cf9 ORKQuestionTypeInteger\cf2 : \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     class = [\cf8 ORKFormItemNumericCell\cf2  \cf5 class\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     \cf7 break\cf2 ;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                 \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                 \cf7 case\cf2  \cf9 ORKQuestionTypeText\cf2 : \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     \cf7 if\cf2  ([formItem.\cf8 answerFormat\cf2  \cf5 isKindOfClass\cf2 :[\cf8 ORKConfirmTextAnswerFormat\cf2  \cf5 class\cf2 ]]) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                         class = [\cf8 ORKFormItemConfirmTextCell\cf2  \cf5 class\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     \} \cf7 else\cf2  \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                         \cf8 ORKTextAnswerFormat\cf2  *textFormat = (\cf8 ORKTextAnswerFormat\cf2  *)answerFormat;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                         \cf7 if\cf2  (!textFormat.\cf8 multipleLines\cf2 ) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                             class = [\cf8 ORKFormItemTextFieldCell\cf2  \cf5 class\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                         \} \cf7 else\cf2  \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                             class = [\cf8 ORKFormItemTextCell\cf2  \cf5 class\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                         \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     \cf7 break\cf2 ;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                 \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                 \cf7 case\cf2  \cf9 ORKQuestionTypeScale\cf2 : \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     class = [\cf8 ORKFormItemScaleCell\cf2  \cf5 class\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     \cf7 break\cf2 ;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                 \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                 \cf7 case\cf2  \cf9 ORKQuestionTypeLocation\cf2 : \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     class = [\cf8 ORKFormItemLocationCell\cf2  \cf5 class\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     \cf7 break\cf2 ;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                 \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                 \cf7 default\cf2 :
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     \cf10 NSAssert\cf2 (\cf7 NO\cf2 , \cf6 @"SHOULD NOT FALL IN HERE %@ %@"\cf2 , \cf11 @(\cf2 type\cf11 )\cf2 , answerFormat);
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     \cf7 break\cf2 ;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf7 if\cf2  (class) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                 \cf7 if\cf2  ([class \cf5 isSubclassOfClass\cf2 :[\cf8 ORKChoiceViewCell\cf2  \cf5 class\cf2 ]]) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     \cf10 NSAssert\cf2 (\cf7 NO\cf2 , \cf6 @"SHOULD NOT FALL IN HERE"\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                 \} \cf7 else\cf2  \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     \cf8 ORKFormItemCell\cf2  *formCell = \cf7 nil\cf2 ;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     formCell = [[class \cf5 alloc\cf2 ] \cf9 initWithReuseIdentifier\cf2 :identifier \cf9 formItem\cf2 :formItem \cf9 answer\cf2 :answer \cf9 maxLabelWidth\cf2 :section.\cf8 maxLabelWidth\cf2  \cf9 delegate\cf2 :\cf7 self\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     [\cf8 _formItemCells\cf2  \cf5 addObject\cf2 :formCell];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     [formCell \cf9 setExpectedLayoutWidth\cf2 :\cf7 self\cf2 .\cf8 tableView\cf2 .\cf4 bounds\cf2 .\cf4 size\cf2 .\cf4 width\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     formCell.\cf4 selectionStyle\cf2  = \cf5 UITableViewCellSelectionStyleNone\cf2 ;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     formCell.\cf8 defaultAnswer\cf2  = \cf8 _savedDefaults\cf2 [formItem.\cf8 identifier\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     \cf7 if\cf2  (!\cf8 _savedAnswers\cf2 ) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                         \cf8 _savedAnswers\cf2  = [\cf4 NSMutableDictionary\cf2  \cf5 new\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     formCell.\cf8 savedAnswers\cf2  = \cf8 _savedAnswers\cf2 ;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                     cell = formCell;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2                 \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2     \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2     cell.\cf4 userInteractionEnabled\cf2  = !\cf7 self\cf2 .\cf8 readOnlyMode\cf2 ;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2     \cf12 //JUDE:mod if statement for MenstruationFormText
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2     
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2     \cf5 NSLog\cf2 (\cf6 @"[self formStep] %@"\cf2 , [\cf7 self\cf2  \cf9 formStep\cf2 ].\cf8 identifier\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2     \cf5 NSLog\cf2 (\cf6 @"[self formStep]-0 %@"\cf2 , [\cf7 self\cf2  \cf9 formStep\cf2 ].\cf8 formItems\cf2 [\cf11 0\cf2 ].\cf8 identifier\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2     \cf5 NSLog\cf2 (\cf6 @"string --  (long)indexPath.row)"\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2     \cf5 NSLog\cf2 (\cf6 @"%ld"\cf2 , (\cf7 long\cf2 )indexPath.\cf4 row\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2     \cf12 //JUDE:mod if statement for MenstruationFormText
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2     \cf12 // use [cell.imageView sizeToFit];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2     \cf7 if\cf2  ([[\cf7 self\cf2  \cf9 formStep\cf2 ].\cf8 identifier\cf2  \cf5 isEqualToString\cf2 :\cf6 @"MenstruationFormText"\cf2 ]) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf4 NSString\cf2  *string1 = [\cf7 self\cf2  \cf9 formStep\cf2 ].\cf8 formItems\cf2 [\cf11 0\cf2 ].\cf8 identifier\cf2 ;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf4 NSString\cf2  *\ulth s\ulnone tring2 = [\cf7 self\cf2  \cf9 formStep\cf2 ].\cf8 formItems\cf2 [\cf11 1\cf2 ].\cf8 identifier\cf2 ;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf5 NSLog\cf2 (\cf6 @"identifier cellForRow %@"\cf2 , identifier);\cf12 //JUDE:remove
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf7 if\cf2  ((\cf7 long\cf2 )indexPath.\cf4 row\cf2  == \cf11 0\cf2 ) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 1 (long)indexPath.row)"\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"%ld"\cf2 , (\cf7 long\cf2 )indexPath.\cf4 row\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf4 NSString\cf2  *string = [\cf7 self\cf2  \cf9 formStep\cf2 ].\cf8 formItems\cf2 [\cf11 0\cf2 ].\cf8 identifier\cf2 ;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 0 %@"\cf2 , string);
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.image = [UIImage imageNamed:@"pad1.png"];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [cell setBackgroundView:bgView];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             cell.\cf4 imageView\cf2 .\cf4 image\cf2  = [\cf4 UIImage\cf2  \cf5 imageNamed\cf2 :\cf6 @"pad1.png"\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf7 if\cf2  ((\cf7 long\cf2 )indexPath.\cf4 row\cf2  == \cf11 1\cf2  ) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 2 (long)indexPath.row)"\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"%ld"\cf2 , (\cf7 long\cf2 )indexPath.\cf4 row\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 1 %@"\cf2 , string1);
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.image = [UIImage imageNamed:@"pad2.png"];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [cell setBackgroundView:bgView];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             cell.\cf4 imageView\cf2 .\cf4 image\cf2  = [\cf4 UIImage\cf2  \cf5 imageNamed\cf2 :\cf6 @"pad2.png"\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf7 if\cf2  ((\cf7 long\cf2 )indexPath.\cf4 row\cf2  == \cf11 2\cf2 ) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 2 (long)indexPath.row)"\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"%ld"\cf2 , (\cf7 long\cf2 )indexPath.\cf4 row\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 1 %@"\cf2 , string1);
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.image = [UIImage imageNamed:@"pad3.png"];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [cell setBackgroundView:bgView];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             cell.\cf4 imageView\cf2 .\cf4 image\cf2  = [\cf4 UIImage\cf2  \cf5 imageNamed\cf2 :\cf6 @"pad3.png"\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf7 if\cf2  ((\cf7 long\cf2 )indexPath.\cf4 row\cf2  == \cf11 0\cf2  && (\cf7 long\cf2 )indexPath.\cf4 section\cf2  == \cf11 1\cf2 ) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 2 (long)indexPath.row)"\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"%ld"\cf2 , (\cf7 long\cf2 )indexPath.\cf4 row\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 1 %@"\cf2 , string1);
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.image = [UIImage imageNamed:@"tampon1.png"];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [cell setBackgroundView:bgView];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             cell.\cf4 imageView\cf2 .\cf4 image\cf2  = [\cf4 UIImage\cf2  \cf5 imageNamed\cf2 :\cf6 @"tampon1.png"\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf7 if\cf2  ((\cf7 long\cf2 )indexPath.\cf4 row\cf2  == \cf11 1\cf2  && (\cf7 long\cf2 )indexPath.\cf4 section\cf2  == \cf11 1\cf2 ) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 2 (long)indexPath.row)"\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"%ld"\cf2 , (\cf7 long\cf2 )indexPath.\cf4 row\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 1 %@"\cf2 , string1);
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.image = [UIImage imageNamed:@"tampon2.png"];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             cell.\cf4 imageView\cf2 .\cf4 image\cf2  = [\cf4 UIImage\cf2  \cf5 imageNamed\cf2 :\cf6 @"tampon2.png"\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf7 if\cf2  ((\cf7 long\cf2 )indexPath.\cf4 row\cf2  == \cf11 2\cf2  && (\cf7 long\cf2 )indexPath.\cf4 section\cf2  == \cf11 1\cf2 ) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 2 (long)indexPath.row)"\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"%ld"\cf2 , (\cf7 long\cf2 )indexPath.\cf4 row\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 1 %@"\cf2 , string1);
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.image = [UIImage imageNamed:@"tampon3.png"];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [cell setBackgroundView:bgView];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             cell.\cf4 imageView\cf2 .\cf4 image\cf2  = [\cf4 UIImage\cf2  \cf5 imageNamed\cf2 :\cf6 @"tampon3.png"\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2     \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2     \cf7 else\cf2  \cf7 if\cf2  ([[\cf7 self\cf2  \cf9 formStep\cf2 ].\cf8 identifier\cf2  \cf5 isEqualToString\cf2 :\cf6 @"StoolConsistencyFormText"\cf2 ]) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf4 NSString\cf2  *string1 = [\cf7 self\cf2  \cf9 formStep\cf2 ].\cf8 formItems\cf2 [\cf11 0\cf2 ].\cf8 identifier\cf2 ;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf5 NSLog\cf2 (\cf6 @"identifier cellForRow %@"\cf2 , identifier);\cf12 //JUDE:remove
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf7 if\cf2  ((\cf7 long\cf2 )indexPath.\cf4 row\cf2  == \cf11 0\cf2 ) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 1 (long)indexPath.row)"\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"%ld"\cf2 , (\cf7 long\cf2 )indexPath.\cf4 row\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf4 NSString\cf2  *string = [\cf7 self\cf2  \cf9 formStep\cf2 ].\cf8 formItems\cf2 [\cf11 0\cf2 ].\cf8 identifier\cf2 ;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 0 %@"\cf2 , string);
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.image = [UIImage imageNamed:@"pad1.png"];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [cell setBackgroundView:bgView];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             cell.\cf4 imageView\cf2 .\cf4 image\cf2  = [\cf4 UIImage\cf2  \cf5 imageNamed\cf2 :\cf6 @"BStoolT1.png"\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             [cell.\cf4 imageView\cf2  \cf5 sizeToFit\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            UIImageView *imv = [[UIImageView alloc]initWithFrame:CGRectMake(3,2, 20, 25)];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            imv.image=[UIImage imageNamed:@"BStoolT1.png"];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [cell addSubview:imv];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"BStoolT1.png"]];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            cell.accessoryView = imageView;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [imageView sizeToFit];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf7 if\cf2  ((\cf7 long\cf2 )indexPath.\cf4 row\cf2  == \cf11 1\cf2  ) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 2 (long)indexPath.row)"\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"%ld"\cf2 , (\cf7 long\cf2 )indexPath.\cf4 row\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 1 %@"\cf2 , string1);
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.image = [UIImage imageNamed:@"pad2.png"];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [cell setBackgroundView:bgView];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //cell.imageView.image = [UIImage imageNamed:@"BStoolT2.png"];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             cell.\cf4 imageView\cf2 .\cf4 image\cf2  = [\cf4 UIImage\cf2  \cf5 imageNamed\cf2 :\cf6 @"BStoolT2.png"\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             [cell.\cf4 imageView\cf2  \cf5 sizeToFit\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf7 if\cf2  ((\cf7 long\cf2 )indexPath.\cf4 row\cf2  == \cf11 0\cf2  && (\cf7 long\cf2 )indexPath.\cf4 section\cf2  == \cf11 1\cf2 ) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 2 (long)indexPath.row)"\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"%ld"\cf2 , (\cf7 long\cf2 )indexPath.\cf4 row\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 1 %@"\cf2 , string1);
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.image = [UIImage imageNamed:@"pad3.png"];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [cell setBackgroundView:bgView];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //cell.imageView.image = [UIImage imageNamed:@"BStoolT3.png"];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             cell.\cf4 imageView\cf2 .\cf4 image\cf2  = [\cf4 UIImage\cf2  \cf5 imageNamed\cf2 :\cf6 @"BStoolT3.png"\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             [cell.\cf4 imageView\cf2  \cf5 sizeToFit\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf7 if\cf2  ((\cf7 long\cf2 )indexPath.\cf4 row\cf2  == \cf11 1\cf2  && (\cf7 long\cf2 )indexPath.\cf4 section\cf2  == \cf11 1\cf2 ) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 2 (long)indexPath.row)"\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"%ld"\cf2 , (\cf7 long\cf2 )indexPath.\cf4 row\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 1 %@"\cf2 , string1);
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.image = [UIImage imageNamed:@"tampon1.png"];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [cell setBackgroundView:bgView];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //cell.imageView.image = [UIImage imageNamed:@"BStoolT4.png"];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             cell.\cf4 imageView\cf2 .\cf4 image\cf2  = [\cf4 UIImage\cf2  \cf5 imageNamed\cf2 :\cf6 @"BStoolT4.png"\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             [cell.\cf4 imageView\cf2  \cf5 sizeToFit\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf7 if\cf2  ((\cf7 long\cf2 )indexPath.\cf4 row\cf2  == \cf11 0\cf2  && (\cf7 long\cf2 )indexPath.\cf4 section\cf2  == \cf11 2\cf2 ) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 2 (long)indexPath.row)"\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"%ld"\cf2 , (\cf7 long\cf2 )indexPath.\cf4 row\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 1 %@"\cf2 , string1);
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.image = [UIImage imageNamed:@"tampon2.png"];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //cell.imageView.image = [UIImage imageNamed:@"BStoolT5.png"];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             cell.\cf4 imageView\cf2 .\cf4 image\cf2  = [\cf4 UIImage\cf2  \cf5 imageNamed\cf2 :\cf6 @"BStoolT5.png"\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             [cell.\cf4 imageView\cf2  \cf5 sizeToFit\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf7 if\cf2  ((\cf7 long\cf2 )indexPath.\cf4 row\cf2  == \cf11 1\cf2  && (\cf7 long\cf2 )indexPath.\cf4 section\cf2  == \cf11 2\cf2 ) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 2 (long)indexPath.row)"\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"%ld"\cf2 , (\cf7 long\cf2 )indexPath.\cf4 row\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 1 %@"\cf2 , string1);
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.image = [UIImage imageNamed:@"tampon3.png"];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [cell setBackgroundView:bgView];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             cell.\cf4 imageView\cf2 .\cf4 image\cf2  = [\cf4 UIImage\cf2  \cf5 imageNamed\cf2 :\cf6 @"BStoolT6.png"\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             [cell.\cf4 imageView\cf2  \cf5 sizeToFit\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"BStoolT6.png"]];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            cell.accessoryView = imageView;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \cf7 if\cf2  ((\cf7 long\cf2 )indexPath.\cf4 row\cf2  == \cf11 2\cf2  && (\cf7 long\cf2 )indexPath.\cf4 section\cf2  == \cf11 2\cf2 ) \{
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 2 (long)indexPath.row)"\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"%ld"\cf2 , (\cf7 long\cf2 )indexPath.\cf4 row\cf2 );
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf5 NSLog\cf2 (\cf6 @"string 1 %@"\cf2 , string1);
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            bgView.image = [UIImage imageNamed:@"tampon3.png"];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            [cell setBackgroundView:bgView];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             cell.\cf4 imageView\cf2 .\cf4 image\cf2  = [\cf4 UIImage\cf2  \cf5 imageNamed\cf2 :\cf6 @"BStoolT7.png"\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             [cell.\cf4 imageView\cf2  \cf5 sizeToFit\cf2 ];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"BStoolT7.png"]];
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             \cf12 //            cell.accessoryView = imageView;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2             
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2         \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2     \}
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2     
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2     \cf7 return\cf2  cell;
+\f1\fs24 \cf0 \
+
+\f0\fs28 \cf2 \}}

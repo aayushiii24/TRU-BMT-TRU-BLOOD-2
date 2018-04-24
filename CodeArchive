@@ -1,0 +1,296 @@
+Fucntion from ORKFormStepViewController.m in ResearchKit/common/step/formStep/
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+NSString *identifier = [NSString stringWithFormat:@"%ld-%ld",(long)indexPath.section, (long)indexPath.row];
+
+UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+
+if (cell == nil) {
+ORKTableSection *section = (ORKTableSection *)_sections[indexPath.section];
+ORKTableCellItem *cellItem = [section items][indexPath.row];
+ORKFormItem *formItem = cellItem.formItem;
+id answer = _savedAnswers[formItem.identifier];
+
+if (section.textChoiceCellGroup) {
+[section.textChoiceCellGroup setAnswer:answer];
+cell = [section.textChoiceCellGroup cellAtIndexPath:indexPath withReuseIdentifier:identifier];
+} else {
+ORKAnswerFormat *answerFormat = [cellItem.formItem impliedAnswerFormat];
+ORKQuestionType type = answerFormat.questionType;
+
+Class class = nil;
+switch (type) {
+case ORKQuestionTypeSingleChoice:
+case ORKQuestionTypeMultipleChoice: {
+if ([formItem.impliedAnswerFormat isKindOfClass:[ORKImageChoiceAnswerFormat class]]) {
+class = [ORKFormItemImageSelectionCell class];
+} else if ([formItem.impliedAnswerFormat isKindOfClass:[ORKValuePickerAnswerFormat class]]) {
+class = [ORKFormItemPickerCell class];
+}
+break;
+}
+
+case ORKQuestionTypeDateAndTime:
+case ORKQuestionTypeDate:
+case ORKQuestionTypeTimeOfDay:
+case ORKQuestionTypeTimeInterval:
+case ORKQuestionTypeHeight: {
+class = [ORKFormItemPickerCell class];
+break;
+}
+
+case ORKQuestionTypeDecimal:
+case ORKQuestionTypeInteger: {
+class = [ORKFormItemNumericCell class];
+break;
+}
+
+case ORKQuestionTypeText: {
+if ([formItem.answerFormat isKindOfClass:[ORKConfirmTextAnswerFormat class]]) {
+class = [ORKFormItemConfirmTextCell class];
+} else {
+ORKTextAnswerFormat *textFormat = (ORKTextAnswerFormat *)answerFormat;
+if (!textFormat.multipleLines) {
+class = [ORKFormItemTextFieldCell class];
+} else {
+class = [ORKFormItemTextCell class];
+}
+}
+break;
+}
+
+case ORKQuestionTypeScale: {
+class = [ORKFormItemScaleCell class];
+break;
+}
+
+case ORKQuestionTypeLocation: {
+class = [ORKFormItemLocationCell class];
+break;
+}
+
+default:
+NSAssert(NO, @"SHOULD NOT FALL IN HERE %@ %@", @(type), answerFormat);
+break;
+}
+
+if (class) {
+if ([class isSubclassOfClass:[ORKChoiceViewCell class]]) {
+NSAssert(NO, @"SHOULD NOT FALL IN HERE");
+} else {
+ORKFormItemCell *formCell = nil;
+formCell = [[class alloc] initWithReuseIdentifier:identifier formItem:formItem answer:answer maxLabelWidth:section.maxLabelWidth delegate:self];
+[_formItemCells addObject:formCell];
+[formCell setExpectedLayoutWidth:self.tableView.bounds.size.width];
+formCell.selectionStyle = UITableViewCellSelectionStyleNone;
+formCell.defaultAnswer = _savedDefaults[formItem.identifier];
+if (!_savedAnswers) {
+_savedAnswers = [NSMutableDictionary new];
+}
+formCell.savedAnswers = _savedAnswers;
+cell = formCell;
+}
+}
+}
+}
+cell.userInteractionEnabled = !self.readOnlyMode;
+//JUDE:mod if statement for MenstruationFormText
+
+NSLog(@"[self formStep] %@", [self formStep].identifier);
+NSLog(@"[self formStep]-0 %@", [self formStep].formItems[0].identifier);
+NSLog(@"string --  (long)indexPath.row)");
+NSLog(@"%ld", (long)indexPath.row);
+//JUDE:mod if statement for MenstruationFormText
+// use [cell.imageView sizeToFit];
+if ([[self formStep].identifier isEqualToString:@"MenstruationFormText"]) {
+NSString *string1 = [self formStep].formItems[0].identifier;
+NSString *string2 = [self formStep].formItems[1].identifier;
+
+NSLog(@"identifier cellForRow %@", identifier);//JUDE:remove
+if ((long)indexPath.row == 0) {
+NSLog(@"string 1 (long)indexPath.row)");
+NSLog(@"%ld", (long)indexPath.row);
+NSString *string = [self formStep].formItems[0].identifier;
+NSLog(@"string 0 %@", string);
+//            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+//            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+//            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+//            bgView.image = [UIImage imageNamed:@"pad1.png"];
+//            [cell setBackgroundView:bgView];
+cell.imageView.image = [UIImage imageNamed:@"pad1.png"];
+
+}
+if ((long)indexPath.row == 1 ) {
+NSLog(@"string 2 (long)indexPath.row)");
+NSLog(@"%ld", (long)indexPath.row);
+NSLog(@"string 1 %@", string1);
+//            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+//            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+//            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+//            bgView.image = [UIImage imageNamed:@"pad2.png"];
+//            [cell setBackgroundView:bgView];
+cell.imageView.image = [UIImage imageNamed:@"pad2.png"];
+
+}
+if ((long)indexPath.row == 2) {
+NSLog(@"string 2 (long)indexPath.row)");
+NSLog(@"%ld", (long)indexPath.row);
+NSLog(@"string 1 %@", string1);
+//            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+//            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+//            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+//            bgView.image = [UIImage imageNamed:@"pad3.png"];
+//            [cell setBackgroundView:bgView];
+cell.imageView.image = [UIImage imageNamed:@"pad3.png"];
+
+}
+if ((long)indexPath.row == 0 && (long)indexPath.section == 1) {
+NSLog(@"string 2 (long)indexPath.row)");
+NSLog(@"%ld", (long)indexPath.row);
+NSLog(@"string 1 %@", string1);
+//            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+//            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+//            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+//            bgView.image = [UIImage imageNamed:@"tampon1.png"];
+//            [cell setBackgroundView:bgView];
+cell.imageView.image = [UIImage imageNamed:@"tampon1.png"];
+
+}
+if ((long)indexPath.row == 1 && (long)indexPath.section == 1) {
+NSLog(@"string 2 (long)indexPath.row)");
+NSLog(@"%ld", (long)indexPath.row);
+NSLog(@"string 1 %@", string1);
+//            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+//            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+//            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+//            bgView.image = [UIImage imageNamed:@"tampon2.png"];
+cell.imageView.image = [UIImage imageNamed:@"tampon2.png"];
+
+
+}
+if ((long)indexPath.row == 2 && (long)indexPath.section == 1) {
+NSLog(@"string 2 (long)indexPath.row)");
+NSLog(@"%ld", (long)indexPath.row);
+NSLog(@"string 1 %@", string1);
+//            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+//            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+//            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+//            bgView.image = [UIImage imageNamed:@"tampon3.png"];
+//            [cell setBackgroundView:bgView];
+cell.imageView.image = [UIImage imageNamed:@"tampon3.png"];
+
+}
+}
+else if ([[self formStep].identifier isEqualToString:@"StoolConsistencyFormText"]) {
+NSString *string1 = [self formStep].formItems[0].identifier;
+NSLog(@"identifier cellForRow %@", identifier);//JUDE:remove
+if ((long)indexPath.row == 0) {
+NSLog(@"string 1 (long)indexPath.row)");
+NSLog(@"%ld", (long)indexPath.row);
+NSString *string = [self formStep].formItems[0].identifier;
+NSLog(@"string 0 %@", string);
+//            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+//            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+//            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+//            bgView.image = [UIImage imageNamed:@"pad1.png"];
+//            [cell setBackgroundView:bgView];
+
+cell.imageView.image = [UIImage imageNamed:@"BStoolT1.png"];
+[cell.imageView sizeToFit];
+//            UIImageView *imv = [[UIImageView alloc]initWithFrame:CGRectMake(3,2, 20, 25)];
+//            imv.image=[UIImage imageNamed:@"BStoolT1.png"];
+//            [cell addSubview:imv];
+//            UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"BStoolT1.png"]];
+//            cell.accessoryView = imageView;
+//            [imageView sizeToFit];
+}
+if ((long)indexPath.row == 1 ) {
+NSLog(@"string 2 (long)indexPath.row)");
+NSLog(@"%ld", (long)indexPath.row);
+NSLog(@"string 1 %@", string1);
+//            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+//            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+//            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+//            bgView.image = [UIImage imageNamed:@"pad2.png"];
+//            [cell setBackgroundView:bgView];
+//cell.imageView.image = [UIImage imageNamed:@"BStoolT2.png"];
+cell.imageView.image = [UIImage imageNamed:@"BStoolT2.png"];
+[cell.imageView sizeToFit];
+
+}
+if ((long)indexPath.row == 0 && (long)indexPath.section == 1) {
+NSLog(@"string 2 (long)indexPath.row)");
+NSLog(@"%ld", (long)indexPath.row);
+NSLog(@"string 1 %@", string1);
+//            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+//            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+//            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+//            bgView.image = [UIImage imageNamed:@"pad3.png"];
+//            [cell setBackgroundView:bgView];
+//cell.imageView.image = [UIImage imageNamed:@"BStoolT3.png"];
+cell.imageView.image = [UIImage imageNamed:@"BStoolT3.png"];
+[cell.imageView sizeToFit];
+
+}
+if ((long)indexPath.row == 1 && (long)indexPath.section == 1) {
+NSLog(@"string 2 (long)indexPath.row)");
+NSLog(@"%ld", (long)indexPath.row);
+NSLog(@"string 1 %@", string1);
+//            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+//            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+//            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+//            bgView.image = [UIImage imageNamed:@"tampon1.png"];
+//            [cell setBackgroundView:bgView];
+//cell.imageView.image = [UIImage imageNamed:@"BStoolT4.png"];
+cell.imageView.image = [UIImage imageNamed:@"BStoolT4.png"];
+[cell.imageView sizeToFit];
+
+}
+if ((long)indexPath.row == 0 && (long)indexPath.section == 2) {
+NSLog(@"string 2 (long)indexPath.row)");
+NSLog(@"%ld", (long)indexPath.row);
+NSLog(@"string 1 %@", string1);
+//            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+//            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+//            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+//            bgView.image = [UIImage imageNamed:@"tampon2.png"];
+//cell.imageView.image = [UIImage imageNamed:@"BStoolT5.png"];
+cell.imageView.image = [UIImage imageNamed:@"BStoolT5.png"];
+[cell.imageView sizeToFit];
+
+
+}
+if ((long)indexPath.row == 1 && (long)indexPath.section == 2) {
+NSLog(@"string 2 (long)indexPath.row)");
+NSLog(@"%ld", (long)indexPath.row);
+NSLog(@"string 1 %@", string1);
+//            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+//            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+//            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+//            bgView.image = [UIImage imageNamed:@"tampon3.png"];
+//            [cell setBackgroundView:bgView];
+cell.imageView.image = [UIImage imageNamed:@"BStoolT6.png"];
+[cell.imageView sizeToFit];
+//            UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"BStoolT6.png"]];
+//            cell.accessoryView = imageView;
+
+}
+
+if ((long)indexPath.row == 2 && (long)indexPath.section == 2) {
+NSLog(@"string 2 (long)indexPath.row)");
+NSLog(@"%ld", (long)indexPath.row);
+NSLog(@"string 1 %@", string1);
+//            UIImageView *bgView = [[UIImageView alloc]initWithFrame:cell.backgroundView.frame];
+//            [bgView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+//            bgView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+//            bgView.image = [UIImage imageNamed:@"tampon3.png"];
+//            [cell setBackgroundView:bgView];
+cell.imageView.image = [UIImage imageNamed:@"BStoolT7.png"];
+[cell.imageView sizeToFit];
+//            UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"BStoolT7.png"]];
+//            cell.accessoryView = imageView;
+
+}
+}
+
+return cell;
+}
