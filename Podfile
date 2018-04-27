@@ -3,13 +3,17 @@ platform :ios, '9.0'
 
 target 'TRU-BMT' do
 # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
-#   use_frameworks!
+# use_frameworks!
 # Pods for TRU-Pain
 pod 'MagicalRecord/Shorthand'
 pod 'Firebase/Core'
 pod 'Firebase/Auth'
 pod 'GoogleSignIn'
 pod 'Firebase/Messaging'
+pod 'FirebaseDatabase'
+pod 'FirebaseStorage'
+pod 'Firebase/Firestore'
+# pod 'Parse'
 end
 
 post_install do |installer|
