@@ -47,11 +47,12 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
             self.passwordTextField.text = keychain.get("password_TRU-BLOOD")
             
             self.db = Firestore.firestore()
-            //self.makeRefs(database: self.db)
+            self.makeRefs(database: self.db)
             
             let settings = FirestoreSettings()
             Firestore.firestore().settings = settings
             settings.isPersistenceEnabled = true
+            
             
 //            var ref: DocumentReference? = nil
 //            ref = self.db.collection("users").addDocument(data: [
