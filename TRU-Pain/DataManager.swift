@@ -100,8 +100,12 @@ final class DataManager {
     // MARK: - Requesting Data
     
     func weatherDataForLocation(taskUUID: UUID, altitude: Double, latitude: Double, longitude: Double, completion: @escaping WeatherDataCompletion) {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        let utcDateFormatter = DateFormatter()
+        utcDateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        
+        let dayFormatter = DateFormatter()
+        dayFormatter.dateFormat = "yyyy-MM-dd"
+        
         var country:String = ""
         var state:String = ""
         self.geocode(latitude: latitude, longitude: longitude) { placemark, error in
@@ -140,35 +144,45 @@ final class DataManager {
             if let dict = result.value as? JSONStandard {
             var currentWeatherDictionary:Dictionary = dict["currently"] as! Dictionary<String, Any>
                 
-                //        ["apparentTemperature"] = "58.11";
-                //        ["cloudCover"] = "0.21";
-                //        ["dewPoint"] = "45.91";
-                //        ["humidity"] = "0.64";
-                //        ["icon"] = "clear-day";
-                //        nearestStormDistance = 0;
-                //        ["ozone"] = "361.7";
-                //        ["precipIntensity"] = "0.002";
-                //        ["precipIntensityError"] = 0;
-                //        ["precipProbability"] = "0.06";
-                //        ["precipType"] = rain;
-                //        ["pressure"] = "1017.31";
-                //        ["summary"] = Clear;
-                //        ["temperature"] = "58.11";
-                //        time = 1524965005;
-                //        ["uvIndex"] = 1;
-                //        ["visibility"] = 10;
-                //        ["windBearing"] = 263;
-                //        ["windGust"] = "14.73";
-                //        ["windSpeed"] = "9.92";
+                let todayDictionary = dict["daily"] as? JSONStandard
+                let data = todayDictionary?["data"] as! NSArray
+                var dataJ:Dictionary = (data[0] as? Dictionary<String, Any>)!
+                
+                print("dataJ")
+                print(data)
+                
+                print("dataJ")
+                print(dataJ ?? "-999")
+                print(dataJ["moonPhase"] as! Double)
+                var dailyWeatherDictionary:Dictionary = [String: String]()
+                
+                let apparentTemperatureMax = String(dataJ["apparentTemperatureMax"] as! Double)
+                let apparentTemperatureMin = String(dataJ["apparentTemperatureMin"] as! Double)
+                let temperatureLow = String(dataJ["temperatureLow"] as! Double)
+                let temperatureMin = String(dataJ["temperatureMin"] as! Double)
+                let sunsetTimestamp = Date(timeIntervalSince1970: dataJ["sunsetTime"] as! TimeInterval)
+                let sunsetTimestampString = utcDateFormatter.string(from: sunsetTimestamp)
+                let dailyWeatherTimestamp = Date(timeIntervalSince1970: dataJ["time"] as! TimeInterval)
+                let precipitationProbability = String(dataJ["precipProbability"] as! Double)
+                let sunriseTimestamp = Date(timeIntervalSince1970: dataJ["sunriseTime"] as! TimeInterval)
+                let sunriseTimestampString = utcDateFormatter.string(from: sunriseTimestamp)
+                let dailyWeatherDateOfEvent = dayFormatter.string(from: dailyWeatherTimestamp)
+                let dailyWeatherSummary = String(dataJ["summary"] as! String)
+                
+                dailyWeatherDictionary["precipitationProbability"] = precipitationProbability
+                dailyWeatherDictionary["apparentTemperatureMax"] = apparentTemperatureMax
+                dailyWeatherDictionary["apparentTemperatureMin"] = apparentTemperatureMin
+                dailyWeatherDictionary["temperatureLow"] = temperatureLow
+                dailyWeatherDictionary["temperatureMin"] = temperatureMin
+                dailyWeatherDictionary["sunriseTimestampString"] = sunriseTimestampString
+                dailyWeatherDictionary["sunsetTimestampString"] = sunsetTimestampString
+                dailyWeatherDictionary["dailyWeatherDateOfEvent"] = dailyWeatherDateOfEvent
+                dailyWeatherDictionary["dailyWeatherSummary"] = dailyWeatherSummary
                 
                 currentWeatherDictionary["taskUUID"] = String(describing: taskUUID)
                 currentWeatherDictionary["altitude"] = altitude
-                currentWeatherDictionary["latitude"] = latitude
                 let currentWeatherTimestamp = Date(timeIntervalSince1970: currentWeatherDictionary["time"] as! TimeInterval)
-                currentWeatherDictionary["currentWeatherDateTime"] = formatter.string(from: currentWeatherTimestamp)
-                
-                let dayFormatter = DateFormatter()
-                dayFormatter.dateFormat = "yyyy-MM-dd"
+                currentWeatherDictionary["currentWeatherDateTime"] = utcDateFormatter.string(from: currentWeatherTimestamp)
                 currentWeatherDictionary["dateOfEvent"] = dayFormatter.string(from: currentWeatherTimestamp)
                 
                 
@@ -176,8 +190,10 @@ final class DataManager {
                 
                 
                 //FIREBASE//
-                var db: Firestore!
-                db = Firestore.firestore()
+                
+                
+                
+                self.db = Firestore.firestore()
                 
                 let handle = Auth.auth().addStateDidChangeListener { (auth, user) in
                     if let user = user {
@@ -185,6 +201,8 @@ final class DataManager {
                         let uid = user.uid
                         let email = user.email
                         //let photoURL = user.photoURL
+                        
+                        print("self.appMode(email: email) out \(self.appMode(email: email!))")
                         
                         currentWeatherDictionary["userID"] = uid
                         currentWeatherDictionary["userEmail"] = email
@@ -203,16 +221,68 @@ final class DataManager {
                             currentWeatherDictionary["appBuild"] = build
                         }
                         
-                        
                         var ref: DocumentReference? = nil
-                        ref = db.collection("users").addDocument(data: currentWeatherDictionary) { err in
+                        ref = self.db.collection("current_weathers").addDocument(data: currentWeatherDictionary) { err in
                             if let err = err {
                                 print("Error adding document: \(err)")
                             } else {
-                                print("Document added with ID: \(ref!.documentID)")
+                                print("current weather Document added with ID: \(ref!.documentID)")
+                            }
+                        }
+                       
+                        dailyWeatherDictionary["taskUUID"] = String(describing: taskUUID)
+                        dailyWeatherDictionary["altitude"] = String(altitude)
+                        dailyWeatherDictionary["latitude"] = String(latitude)
+                        dailyWeatherDictionary["userID"] = uid
+                        dailyWeatherDictionary["userEmail"] = email
+                        dailyWeatherDictionary["appMode"] = self.appMode(email: email!)
+                        dailyWeatherDictionary["author_id"] = uid
+                        dailyWeatherDictionary["country"]  = country
+                        dailyWeatherDictionary["state"] = state
+                        dailyWeatherDictionary["dataOfType"] = "daily_weather"
+                        print("currentWeatherDictionary \(String(describing: dataJ))")
+                        
+                        if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+                            print("version of app \(version)")
+                            dailyWeatherDictionary["appVersion"] = version
+                        }
+                        if let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
+                            print("version of app \(build)")
+                            dailyWeatherDictionary["appBuild"] = build
+                        }
+                        
+                        dailyWeatherDictionary["taskUUID"] = String(describing: taskUUID)
+                        dailyWeatherDictionary["altitude"] = String(altitude)
+                        
+                        
+                        let dayFormatter = DateFormatter()
+                        dayFormatter.dateFormat = "yyyy-MM-dd"
+                        let dateString = dayFormatter.string(from: dailyWeatherTimestamp)
+                        dataJ["dateOfEvent"] = dateString
+                        
+                        
+                        
+                        
+                        //"dailyWeather" + dateString + "." +
+                        
+                        
+                        
+                        print("dailyweather dictionary \(dailyWeatherDictionary)")
+                        
+                        let idForFirestore = "daily_weather." + dateString + "." + uid
+                        
+                        
+                        var dailyWeatherRef: DocumentReference? = nil
+                        self.db.collection("daily_weathers").document(idForFirestore).setData(dailyWeatherDictionary) { err in
+                            print("self.appMode(email: email!) inside dailyWeather \(self.appMode(email: email!))")
+                            if let err = err {
+                                print("Error writing document: \(err)")
+                            } else {
+                                print("Document successfully written!")
                             }
                         }
                     }
+
                 }
 
             } //if let dictionaryends here

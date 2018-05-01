@@ -699,7 +699,7 @@ extension RootViewController: ORKTaskViewControllerDelegate {
                         symptomsTracked["author_id"] = uid
                         
                         var ref: DocumentReference? = nil
-                        ref = self.db.collection("users").addDocument(data: symptomsTracked) { err in
+                        ref = self.db.collection("symptoms").addDocument(data: symptomsTracked) { err in
                             if let err = err {
                                 print("Error adding document: \(err)")
                             } else {
@@ -837,7 +837,7 @@ extension RootViewController: ORKTaskViewControllerDelegate {
                         let idForFirestore = "DailyMeals." + dayFormatter.string(from: date!) + "." + uid
                         
                         var ref: DocumentReference? = nil
-                        self.db.collection("users").document(idForFirestore).setData(dailyMeals) { err in
+                        self.db.collection("meals").document(idForFirestore).setData(dailyMeals) { err in
                             
                             if let err = err {
                                 print("Error writing document: \(err)")
@@ -996,7 +996,7 @@ extension RootViewController: ORKTaskViewControllerDelegate {
                         let idForFirestore = "DailyHealth." + dayFormatter.string(from: date!) + "." + uid
                         
                         var ref: DocumentReference? = nil
-                        self.db.collection("users").document(idForFirestore).setData(dailyHealth) { err in
+                        self.db.collection("healths").document(idForFirestore).setData(dailyHealth) { err in
                             
                             if let err = err {
                                 print("Error writing document: \(err)")
@@ -1254,7 +1254,7 @@ extension RootViewController: ORKTaskViewControllerDelegate {
                         let idForFirestore = "DailyStools." + dayFormatter.string(from: date!) + "." + uid
                         
                         var ref: DocumentReference? = nil
-                        self.db.collection("users").document(idForFirestore).setData(dailyStools) { err in
+                        self.db.collection("stools").document(idForFirestore).setData(dailyStools) { err in
                             
                             if let err = err {
                                 print("Error writing document: \(err)")
@@ -1872,12 +1872,12 @@ extension RootViewController: CLLocationManagerDelegate {
         
         let location:CLLocation = locations.last!
         if (location.horizontalAccuracy > 0) {
+            let keychain = KeychainSwift()
+            var email:String = ""
+            
             let dataManager = DataManager(baseURL: API.AuthenticatedBaseURL)
             dataManager.weatherDataForLocation(taskUUID:self.taskUUID!, altitude: mostRecentLocation.altitude,latitude: location.coordinate.latitude, longitude: location.coordinate.longitude) { (response, error) in
                 print(response ?? "-999")
-                
-                
-                
             }
             //self.currentLocation = location
             print("find my current location: \(location)")

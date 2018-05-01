@@ -21,6 +21,8 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
     var db: Firestore!
     var studyName: String?
     var study: String?
+    var docRef : DocumentReference!
+    
     
     var managedContext: NSManagedObjectContext!
     typealias JSONStandard = Dictionary<String, AnyObject>
@@ -36,9 +38,16 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        //self.docRef = Firestore.firestore().document("friends/profile")
+        
+        
         let standardDefaults = UserDefaults.standard
         if standardDefaults.object(forKey: "ORKSampleFirstRun") as! String == "ORKSampleFirstRun" {
           self.loginButton.isHidden = true
+            self.usernameTextField.isEnabled = false
+            self.passwordTextField.isEnabled = false
+            
         }
         
         let keychain = KeychainSwift()
@@ -47,7 +56,6 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
             self.passwordTextField.text = keychain.get("password_TRU-BLOOD")
             
             self.db = Firestore.firestore()
-            self.makeRefs(database: self.db)
             
             let settings = FirestoreSettings()
             Firestore.firestore().settings = settings
@@ -128,25 +136,7 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
 //    }
 //
     
-    func makeRefs(database db: Firestore) -> (CollectionReference, DocumentReference) {
-        var collectionRef = db.collection("users")
-        
-        var documentRef: DocumentReference
-        documentRef = collectionRef.document("my-doc")
-        // or
-       // documentRef = db.document("my-collection/my-doc")
-        
-        // deeper collection (my-collection/my-doc/some/deep/collection)
-        collectionRef = documentRef.collection("some/deep/collection")
-        
-        // parent doc (my-collection/my-doc/some/deep)
-        documentRef = collectionRef.parent!
-        
-        // print paths.
-        print("Collection: \(collectionRef.path), document: \(documentRef.path)")
-        
-        return (collectionRef, documentRef)
-    }
+   
     
     
     func registrationFailed()  {
@@ -279,6 +269,8 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
                     print("Yeah, response not nil")
                     
                     self.loginButton.isHidden = false
+                self.usernameTextField.isEnabled = true
+                self.passwordTextField.isEnabled = true
                     self.usernameTextField.text = user
                     self.passwordTextField.text = password
                     let keychain = KeychainSwift()
@@ -460,8 +452,7 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
                     // ...
                     print("user?.uid \(user?.uid)")
                     self.db = Firestore.firestore()
-                    self.makeRefs(database: self.db)
-                    
+                   
                     let settings = FirestoreSettings()
                     Firestore.firestore().settings = settings
                     settings.isPersistenceEnabled = true

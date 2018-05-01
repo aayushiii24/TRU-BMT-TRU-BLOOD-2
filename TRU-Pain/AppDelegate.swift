@@ -12,6 +12,7 @@ import UIKit
 import CoreData
 import UserNotifications
 import Firebase
+import AlamofireNetworkActivityIndicator
 
 // import GoogleSignIn
 // import FirebaseInstanceID
@@ -46,6 +47,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         /*Firebase*/
         FirebaseApp.configure()
         
+        NetworkActivityIndicatorManager.shared.isEnabled = true
         
         
         /* PARSE

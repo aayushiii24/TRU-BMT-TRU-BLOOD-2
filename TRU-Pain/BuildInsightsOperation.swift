@@ -716,7 +716,7 @@ class BuildInsightsOperation: Operation {
                     let idForFirestore = "CareCard." + dateString + "." + uid
                     
                     var ref: DocumentReference? = nil
-                    self.db.collection("users").document(idForFirestore).setData(careCardDiary) { err in
+                    self.db.collection("cares").document(idForFirestore).setData(careCardDiary) { err in
                         
                             if let err = err {
                                 print("Error writing document: \(err)")
