@@ -81,6 +81,8 @@ class RootViewController: UITabBarController {
     var container: NSPersistentContainer!
     var isFirstUpdate:Bool = false //CORE LOCATION
     var taskUUID: UUID?
+    var userEmail:String = ""
+    
     let listDataManager = ListDataManager()
     
     
@@ -327,7 +329,7 @@ class RootViewController: UITabBarController {
         print("0")
         
     }
-    
+
     func toHome() -> () {
         performSegue(withIdentifier: "ckReturnHome", sender: nil)
         
@@ -452,6 +454,14 @@ extension RootViewController: ORKTaskViewControllerDelegate {
     
     //CORE LOCATION
     func findCurrentLocation(taskID:String) {
+        self.isFirstUpdate = true;
+        locationManager.startUpdatingLocation()
+        print("finding current location")
+        print("finding current location \(taskID)")
+    }
+    
+    //CORE LOCATION
+    func findCurrentUserLocation(taskID:String) {
         self.isFirstUpdate = true;
         locationManager.startUpdatingLocation()
         print("finding current location")
@@ -726,7 +736,7 @@ extension RootViewController: ORKTaskViewControllerDelegate {
                         archive.append(ar as! [String])
                         
                         
-                        //print("item: \(e.name)) \(index):\(e)")
+                        print("item: \(e.name)) \(index):\(e)")
                     }
                     
                     
@@ -1872,8 +1882,12 @@ extension RootViewController: CLLocationManagerDelegate {
         
         let location:CLLocation = locations.last!
         if (location.horizontalAccuracy > 0) {
-            let keychain = KeychainSwift()
-            var email:String = ""
+            
+//            let keychain = KeychainSwift()
+//            if keychain.get("username_TRU-BLOOD") != nil {
+//                self.userEmail = keychain.get("username_TRU-BLOOD")!
+//            }
+            
             
             let dataManager = DataManager(baseURL: API.AuthenticatedBaseURL)
             dataManager.weatherDataForLocation(taskUUID:self.taskUUID!, altitude: mostRecentLocation.altitude,latitude: location.coordinate.latitude, longitude: location.coordinate.longitude) { (response, error) in

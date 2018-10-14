@@ -30,6 +30,8 @@
 
 import CareKit
 import Firebase
+import CoreLocation
+
 
 class BuildInsightsOperation: Operation {
     
@@ -113,6 +115,9 @@ class BuildInsightsOperation: Operation {
             mode = "Testing"
             print("app mode is Test")
         }
+        
+        
+        
         return mode
     }
     
@@ -125,13 +130,13 @@ class BuildInsightsOperation: Operation {
         let now = Date()
         
         var components = DateComponents()
-        components.day = -6
+        components.day = -90
         let startDate = calendar.weekDatesForDate(calendar.date(byAdding: components as DateComponents, to: now)!).start
         
         var totalEventCount = 0
         var completedEventCount = 0
         
-        for offset in (0...6).reversed() {
+        for offset in (0...90).reversed() {
             components.day = offset
             let dayDate = calendar.date(byAdding: components as DateComponents, to: startDate)!
             let dayComponents = calendar.dateComponents([.year, .month, .day, .era], from: dayDate)
@@ -170,13 +175,13 @@ class BuildInsightsOperation: Operation {
         let now = Date()
         
         var components = DateComponents()
-        components.day = -6
+        components.day = -90
         let startDate = calendar.weekDatesForDate(calendar.date(byAdding: components as DateComponents, to: now)!).start
         
         var totalEventCount = 0
         var completedEventCount = 0
         
-        for offset in (0...6).reversed() {
+        for offset in (0...90).reversed() {
             components.day = offset
             let dayDate = calendar.date(byAdding: components as DateComponents, to: startDate)!
             let dayComponents = calendar.dateComponents([.year, .month, .day, .era], from: dayDate)
@@ -215,13 +220,13 @@ class BuildInsightsOperation: Operation {
         let now = Date()
         
         var components = DateComponents()
-        components.day = -6
+        components.day = -90
         let startDate = calendar.weekDatesForDate(calendar.date(byAdding: components as DateComponents, to: now)!).start
         
         var totalEventCount = 0
         var completedEventCount = 0
         
-        for offset in (0...6).reversed() {
+        for offset in (0...90).reversed() {
             components.day = offset
             let dayDate = calendar.date(byAdding: components as DateComponents, to: startDate)!
             let dayComponents = calendar.dateComponents([.year, .month, .day, .era], from: dayDate)
@@ -260,13 +265,13 @@ class BuildInsightsOperation: Operation {
         let now = Date()
         
         var components = DateComponents()
-        components.day = -6
+        components.day = -90
         let startDate = calendar.weekDatesForDate(calendar.date(byAdding: components as DateComponents, to: now)!).start
         
         var totalEventCount = 0
         var completedEventCount = 0
         
-        for offset in (0...6).reversed() {
+        for offset in (0...90).reversed() {
             components.day = offset
             let dayDate = calendar.date(byAdding: components as DateComponents, to: startDate)!
             let dayComponents = calendar.dateComponents([.year, .month, .day, .era], from: dayDate)
@@ -305,13 +310,13 @@ class BuildInsightsOperation: Operation {
         let now = Date()
         
         var components = DateComponents()
-        components.day = -6
+        components.day = -90
         let startDate = calendar.weekDatesForDate(calendar.date(byAdding: components as DateComponents, to: now)!).start
         
         var totalEventCount = 0
         var completedEventCount = 0
         
-        for offset in (0...6).reversed() {
+        for offset in (0...90).reversed() {
             components.day = offset
             let dayDate = calendar.date(byAdding: components as DateComponents, to: startDate)!
             let dayComponents = calendar.dateComponents([.year, .month, .day, .era], from: dayDate)
@@ -350,13 +355,13 @@ class BuildInsightsOperation: Operation {
         let now = Date()
         
         var components = DateComponents()
-        components.day = -6
+        components.day = -90
         let startDate = calendar.weekDatesForDate(calendar.date(byAdding: components as DateComponents, to: now)!).start
         
         var totalEventCount = 0
         var completedEventCount = 0
         
-        for offset in (0...6).reversed() {
+        for offset in (0...90).reversed() {
             components.day = offset
             let dayDate = calendar.date(byAdding: components as DateComponents, to: startDate)!
             let dayComponents = calendar.dateComponents([.year, .month, .day, .era], from: dayDate)
@@ -394,7 +399,7 @@ class BuildInsightsOperation: Operation {
         // Determine the date to start health/proteins comparisons from.
         let calendar = Calendar.current
         var components = DateComponents()
-        components.day = -6
+        components.day = -90
         
         //Prep for data transfer
         
@@ -426,7 +431,7 @@ class BuildInsightsOperation: Operation {
         percentageFormatter.numberStyle = .percent
         
         /*
-         Loop through 6 days, collecting proteins adherance and helath scores
+         Loop through 90 days, collecting proteins adherance and helath scores
          for each.
          */
         var generalHealthValues = [Int]()
@@ -463,7 +468,7 @@ class BuildInsightsOperation: Operation {
         utcDateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
         
         
-        for offset in (0...6).reversed() {
+        for offset in (0...90).reversed() {
             
             let settings = FirestoreSettings()
             Firestore.firestore().settings = settings
@@ -644,7 +649,7 @@ class BuildInsightsOperation: Operation {
             }
             
             
-            // [START FIREBASE setup]
+           
 
             
             
@@ -666,7 +671,7 @@ class BuildInsightsOperation: Operation {
 //            Firestore.firestore().settings = settings
 //            settings.isPersistenceEnabled = true
             
-            // [END setup]
+            // [START FIREBASE setup]
             db = Firestore.firestore()
             
             let options = QueryListenOptions()

@@ -38,6 +38,16 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        //TESTING CODE
+        /*let manager = ListDataManager()
+        let previousSymtoms = manager.findTodaySymptomFocus(date: "2018JUN21")
+        let symptoms = manager.findSymptomFocus(entityName: "DSymptomFocus") as [DSymptomFocus]
+        print("Symptom- previous \(symptoms) anything")
+        for item in symptoms {
+            print("Symptom- date \(item.dateString) anything")
+            print("Symptom- name \(item.name) anything")
+        }*/
+        //END: TESTING
         
         //self.docRef = Firestore.firestore().document("friends/profile")
         

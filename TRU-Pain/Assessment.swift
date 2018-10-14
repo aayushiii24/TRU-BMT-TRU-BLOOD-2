@@ -133,7 +133,9 @@ extension Assessment {
                     dayFormatter.dateFormat = "yyyyMMdd"
                     
                     let manager = ListDataManager()
-                    let previousSymtoms = manager.findTodaySymptomFocus(date: dayFormatter.string(from: symptomDate as Date))
+                    let previousSymtoms = manager.findTodaySymptomFocus(date: "20180620")
+                    
+                    //let symptoms = manager.findSymptomFocus(entityName: "DSymptomFocus") as [DSymptomFocus]
                     print("Symptom- previous \(previousSymtoms)")
                     
                     return OCKCarePlanEventResult(valueString: symptomResult, unitString: previousSymtoms, userInfo: nil)

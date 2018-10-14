@@ -187,7 +187,7 @@ class InsightsBuilder {
         let now = Date()
         
         let currentWeekRange = calendar.weekDatesForDate(now)
-        let previousWeekRange = calendar.weekDatesForDate(currentWeekRange.start.addingTimeInterval(-1))
+        let previousWeekRange = calendar.weekDatesForDate(currentWeekRange.start.addingTimeInterval(-7776000))
         //let previousWeekRange = calendar.weekDatesForDate(currentWeekRange.start.addingTimeInterval(-31536000))
         
         let queryRangeStart = calendar.dateComponents([.year, .month, .day, .era], from: previousWeekRange.start)
