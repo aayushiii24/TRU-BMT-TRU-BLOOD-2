@@ -12,7 +12,9 @@ import UIKit
 import CoreData
 import UserNotifications
 import Firebase
-import AlamofireNetworkActivityIndicator
+import HealthKit
+
+//import AlamofireNetworkActivityIndicator
 
 // import GoogleSignIn
 // import FirebaseInstanceID
@@ -22,7 +24,7 @@ import AlamofireNetworkActivityIndicator
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 
     var window: UIWindow?
-    
+    let healthStore = HKHealthStore()
     //PARSE
     /*func saveInstallationObject(){
         if let installation = PFInstallation.current(){
@@ -40,14 +42,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             }
         }
     }*/
+    func uploadSamples(_ samples: [Any]?, fromElement i: Int, then completionHandler: HKObserverQueryCompletionHandler) {
+        if samples?.count == i {
+            return
+        }
+        let sample = samples![i] as? HKQuantitySample
+        print("sample ---> \(String(describing: sample))")
+    }
     
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Set up the style and color of the common UI elements
         
         /*Firebase*/
         FirebaseApp.configure()
         
-        NetworkActivityIndicatorManager.shared.isEnabled = true
+        //NetworkActivityIndicatorManager.shared.isEnabled = true
         
         
         /* PARSE
@@ -83,6 +92,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             // For iOS 10 data message (sent via FCM)
 			//            FIRMessaging.messaging().remoteMessageDelegate = self
             
+        }
+        //self.getRecentSteps()
+        if #available(iOS 11.0, *) {
+            self.requestAccessWithCompletion()
+        } else {
+            // Fallback on earlier versions
         }
         
         return true
@@ -146,6 +161,172 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         context.saveToPersistentStoreAndWait()
     }
 
+    
+    //HEALTHKIT STUFF
+    @available(iOS 11.0, *)
+    func dataTypesToRead() -> Set<HKObjectType> {
+        return Set(arrayLiteral:
+            HKObjectType.characteristicType(forIdentifier: HKCharacteristicTypeIdentifier.dateOfBirth)!,
+                   HKObjectType.characteristicType(forIdentifier: HKCharacteristicTypeIdentifier.biologicalSex)!,
+                   HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bodyMass)!,
+                   HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.height)!,
+                   HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.stepCount)!,
+                   HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.heartRate)!,
+                   HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.restingHeartRate)!,
+                   HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.walkingHeartRateAverage)!,
+                   HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.heartRateVariabilitySDNN)!,
+                   HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.basalEnergyBurned)!,
+                   HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.activeEnergyBurned)!,
+                   HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!,
+                   HKObjectType.workoutType()
+        )
+    }
+    
+    func dataTypesToWrite() -> Set<HKSampleType> {
+        return Set(arrayLiteral:
+            HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bodyMass)!,
+                   HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.height)!,
+                   HKObjectType.workoutType()
+        )
+    }
+    
+    @available(iOS 11.0, *)
+    func queryForUpdates(type: HKObjectType) {
+        switch type {
+        case HKObjectType.characteristicType(forIdentifier: HKCharacteristicTypeIdentifier.dateOfBirth)!:
+            debugPrint("HKCharacteristicTypeIdentifierDateOfBirth")
+        case HKObjectType.characteristicType(forIdentifier: HKCharacteristicTypeIdentifier.biologicalSex)!:
+            debugPrint("HKCharacteristicTypeIdentifier.biologicalSex")
+        case HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.heartRate)!:
+            debugPrint("HKQuantityTypeIdentifier.heartRate")
+        case HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.heartRateVariabilitySDNN)!:
+            debugPrint("HKQuantityTypeIdentifier.heartRate")
+        case HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.restingHeartRate)!:
+            debugPrint("HKQuantityTypeIdentifier.restingHeartRate")
+        case HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.walkingHeartRateAverage)!:
+            debugPrint("HKQuantityTypeIdentifier.walkingHeartRateAverage")
+        case HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bodyMassIndex)!:
+            debugPrint("HKQuantityTypeIdentifier.bodyMassIndex")
+        case HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bodyMass)!:
+            debugPrint("HKQuantityTypeIdentifier.bodyMass")
+        case HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.height)!:
+            debugPrint("HKQuantityTypeIdentifier.height")
+        case HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.stepCount)!:
+            debugPrint("HKQuantityTypeIdentifier.stepCount")
+        case is HKWorkoutType:
+            debugPrint("HKWorkoutType")
+        default: debugPrint("Unhandled HKObjectType: \(type)")
+        }
+        
+    }
+    
+    func getRecentSteps()  {
+        if HKHealthStore.isHealthDataAvailable()
+        {
+            // Create the step count type.
+            guard let stepCountType = HKObjectType.quantityType(forIdentifier: .stepCount) else {
+                // This should never fail when using a defined constant.
+                fatalError("*** Unable to get the step cout type ***")
+            }
+            
+            
+            var result : (anchor:HKQueryAnchor?, count:Int?) = (anchor:nil, count: -1)
+            
+            // Create the query.
+            let query = HKAnchoredObjectQuery(type: stepCountType,
+                                              predicate: nil,
+                                              anchor: result.anchor,
+                                              limit: HKObjectQueryNoLimit)
+            { (query, samplesOrNil, deletedObjectsOrNil, newAnchor, errorOrNil) in
+                
+                guard let samples = samplesOrNil, let deletedObjects = deletedObjectsOrNil else {
+                    // Handle the error here.
+                    fatalError("*** An error occurred during the initial query: \(errorOrNil!.localizedDescription) ***")
+                }
+                
+                result.anchor = newAnchor
+                
+                for stepCountSample in samples {
+                    // Process the new step count samples here.
+                    print("for stepCountSample in samples \(stepCountSample)")
+                }
+                
+                for deletedStepCountSamples in deletedObjects {
+                    // Process the deleted step count samples here.
+                    print("for deletedStepCountSamples in deletedObjects \(deletedStepCountSamples)")
+                }
+            }
+            
+            
+            // Optionally, add an update handler.
+            query.updateHandler = { (query, samplesOrNil, deletedObjectsOrNil, newAnchor, errorOrNil) in
+                
+                guard let samples = samplesOrNil, let deletedObjects = deletedObjectsOrNil else {
+                    // Handle the error here.
+                    fatalError("*** An error occurred during an update: \(errorOrNil!.localizedDescription) ***")
+                }
+                
+                result.anchor = newAnchor
+                
+                for stepCountSample in samples {
+                    // Process the step counts from the update here.
+                    print("for stepCountSample in samples 2.  \(stepCountSample)")
+                }
+                
+                for deletedStepCountSamples in deletedObjects {
+                    // Process the deleted step count smaples from the update here.
+                    print("for deletedStepCountSamples in deletedObjects 2. \(deletedStepCountSamples)")
+                }
+            }
+            
+            // Run the query.
+            healthStore.execute(query)
+        }
+    }
+    
+    func setUpBackgroundDeliveryForDataTypes(types: Set<HKObjectType>) {
+        for type in types {
+            guard let sampleType = type as? HKSampleType else { print("ERROR: \(type) is not an HKSampleType"); continue }
+            let query = HKObserverQuery(sampleType: sampleType, predicate: nil) { (query, completionHandler, anError) in
+                debugPrint("observer query update handler called for type \(type), error: \(String(describing: anError))")
+                if anError == nil {
+                    if #available(iOS 11.0, *) {
+                        
+                        self.queryForUpdates(type: type)
+                    } else {
+                        // Fallback on earlier versions
+                    }
+                }
+                completionHandler()
+            }
+            
+            healthStore.execute(query)
+            healthStore.enableBackgroundDelivery(for: type, frequency: .immediate) { (success, error) in
+                debugPrint("enableBackgroundDeliveryForType handler called for \(type) - success: \(success), error: \(String(describing: error))")
+                //self.updateSteps(completionHandler: ({
+                //
+                //                }))
+            }
+        }
+        
+    }
+    
+    @available(iOS 11.0, *)
+    func requestAccessWithCompletion() {
+        healthStore.requestAuthorization(toShare: dataTypesToWrite(), read: dataTypesToRead()) { (success, error) -> Void in
+            if success {
+                print("success")
+                self.setUpBackgroundDeliveryForDataTypes(types:self.dataTypesToRead())
+                //                DispatchQueue.main.async() {
+                //                    completion(success, error as NSError?)
+                //
+                //                }
+            } else {
+                print("failure")
+            }
+            if let error = error { print(error) }
+        }
+    }
 
 }
 extension AppDelegate {
@@ -162,9 +343,20 @@ extension AppDelegate {
         //UI Color scheme
         UINavigationBar.appearance().tintColor = Colors.careKitRed.color
         UITabBar.appearance().tintColor = Colors.careKitRed.color
-        UITabBarItem.appearance().setTitleTextAttributes([NSForegroundColorAttributeName: Colors.careKitRed.color], for:.selected)
-        UITabBarItem.appearance().setTitleTextAttributes([NSForegroundColorAttributeName: Colors.careKitRed.color], for:.normal)
+        UITabBarItem.appearance().setTitleTextAttributes(convertToOptionalNSAttributedStringKeyDictionary([convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor): Colors.careKitRed.color]), for:.selected)
+        UITabBarItem.appearance().setTitleTextAttributes(convertToOptionalNSAttributedStringKeyDictionary([convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor): Colors.careKitRed.color]), for:.normal)
         UITableViewCell.appearance().tintColor = Colors.careKitRed.color
     }
 }
 
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToOptionalNSAttributedStringKeyDictionary(_ input: [String: Any]?) -> [NSAttributedString.Key: Any]? {
+	guard let input = input else { return nil }
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKey(_ input: NSAttributedString.Key) -> String {
+	return input.rawValue
+}

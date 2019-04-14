@@ -334,7 +334,7 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
         content.body = "Keep track of your health measures."
         content.categoryIdentifier = "alarm"
         content.userInfo = ["customData": "ReminderInfo"]
-        content.sound = UNNotificationSound.default()
+        content.sound = UNNotificationSound.default
         
         
         //let study = self.study?.lowercased()
@@ -398,7 +398,7 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
         content.body = "You are keeping track of your health measures?"
         content.categoryIdentifier = "alarm"
         content.userInfo = ["customData": "ReminderInfo"]
-        content.sound = UNNotificationSound.default()
+        content.sound = UNNotificationSound.default
         
 //        let study = self.study?.lowercased()
 //        let imageName = "crc2"+study!

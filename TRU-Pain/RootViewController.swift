@@ -68,6 +68,10 @@ class RootViewController: UITabBarController {
     
     fileprivate var connectViewController: OCKConnectViewController!
     
+    
+     private var stepsViewController:UIViewController!
+    
+    
     //fileprivate var watchManager: WatchConnectivityManager?
     
     private var videoRecordingViewController:UIViewController!
@@ -93,6 +97,12 @@ class RootViewController: UITabBarController {
         manager.requestWhenInUseAuthorization()
         return manager
     }()
+    
+    
+    let health: HKHealthStore = HKHealthStore()
+    let heartRateUnit:HKUnit = HKUnit(from: "count/min")
+    let heartRateType:HKQuantityType   = HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.heartRate)!
+    var heartRateQuery:HKQuery?
     
     // MARK: Initialization
     
@@ -160,6 +170,7 @@ class RootViewController: UITabBarController {
         symptomTrackerViewController = createSymptomTrackerViewController()
         insightsViewController = createInsightsViewController()
         connectViewController = createConnectViewController()
+        stepsViewController = createStepsViewController()
         
         
         self.viewControllers = [
@@ -167,7 +178,7 @@ class RootViewController: UITabBarController {
             UINavigationController(rootViewController: symptomTrackerViewController),
             UINavigationController(rootViewController: insightsViewController),
             UINavigationController(rootViewController: connectViewController),
-            
+            UINavigationController(rootViewController: stepsViewController),
         ]
         storeManager.delegate = self
         //watchManager = WatchConnectivityManager(withStore: storeManager.store)
@@ -180,7 +191,7 @@ class RootViewController: UITabBarController {
         super.viewDidLoad()
         
         
-        UITabBarItem.appearance().setTitleTextAttributes([NSForegroundColorAttributeName: UIColor.gray], for: .normal)
+        UITabBarItem.appearance().setTitleTextAttributes(convertToOptionalNSAttributedStringKeyDictionary([convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor): UIColor.gray]), for: .normal)
         //Getting data from the store
         //self.viewSymptoms()
         
@@ -191,7 +202,113 @@ class RootViewController: UITabBarController {
         // [END setup]
         self.db = Firestore.firestore()
         
+        
+        
+        
+        self.requestAuthorization()
+        
     }
+    
+    func requestAuthorization()
+    {
+       print("requesting authorization to read heart data")
+        let readingTypes:Set = Set( [heartRateType] )
+        
+        //writing
+        let writingTypes:Set = Set( [heartRateType] )
+        
+        //auth request
+        health.requestAuthorization(toShare: writingTypes, read: readingTypes) { (success, error) -> Void in
+            
+            if error != nil
+            {
+                print("error getting data \(error?.localizedDescription)")
+            }
+            else if success
+            {
+                self.readHeartRateData()
+            }
+        }//eo-request
+    }
+    
+    /*Method to get todays heart rate - this only reads data from health kit. */
+    func readHeartRateData() -> Void {
+        print("reading heart rate data  ")
+        // STEP 9.1: just as in STEP 6, we're telling the `HealthKitStore`
+        // that we're interested in reading heart rate data
+        let heartRateType = HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.heartRate)!
+        
+        // STEP 9.2: define a query for "recent" heart rate data;
+        // in pseudo-SQL, this would look like:
+        //
+        // SELECT bpm FROM HealthKitStore WHERE qtyTypeID = '.heartRate';
+        
+        //predicate
+//        let calendar = NSCalendar.current
+//        let now = NSDate()
+//        let components = calendar.dateComponents([.year,.month,.day], from: now as Date)
+//        guard let startDate:NSDate = calendar.date(from: components) as NSDate? else {return}
+//        let endDate:NSDate? = calendar.date(byAdding: components, value: 1, to: startDate)
+//        //dateByAddingUnit(.Day, value: 1, toDate: startDate, options: [])
+//        let predicate = HKQuery.predicateForSamplesWithStartDate(startDate as Date, endDate: endDate as Date?, options: .None)
+
+        
+        let query = HKAnchoredObjectQuery(type: heartRateType, predicate: nil, anchor: nil, limit: HKObjectQueryNoLimit) {
+            
+            
+            
+            (query, samplesOrNil, deletedObjectsOrNil, newAnchor, errorOrNil) in
+            
+            if let samples = samplesOrNil {
+                
+                for heartRateSamples in samples {
+                    print("heartRateSamples: \n\(heartRateSamples)")
+                }
+                
+            } else {
+                print("No heart rate sample available.")
+            }
+            
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        }
+        
+        // STEP 9.3: execute the query for heart rate data
+        health.execute(query)
+        
+    }
+    
+//    /*used only for testing, prints heart rate info */
+//    private func printHeartRateInfo(results:[HKSample]?)
+//    {
+//        for(var iter = 0 ; iter < results!.count; iter++)
+//        {
+//            guard let currData:HKQuantitySample = results![iter] as? HKQuantitySample else { return }
+//
+//            print("[\(iter)]")
+//            print("Heart Rate: \(currData.quantity.doubleValueForUnit(heartRateUnit))")
+//            print("quantityType: \(currData.quantityType)")
+//            print("Start Date: \(currData.startDate)")
+//            print("End Date: \(currData.endDate)")
+//            print("Metadata: \(currData.metadata)")
+//            print("UUID: \(currData.UUID)")
+//            print("Source: \(currData.sourceRevision)")
+//            print("Device: \(currData.device)")
+//            print("---------------------------------\n")
+//        }//eofl
+//    }//eom
+    
+    
     
     // MARK: Convenience
     private func createVideoRecordingViewController() -> UIViewController {
@@ -269,6 +386,19 @@ class RootViewController: UITabBarController {
         return viewController
     }
     
+    private func createStepsViewController() -> UIViewController {
+        let vc = UIStoryboard(name: "Main", bundle: nil)
+        let viewController = vc.instantiateViewController(withIdentifier: "StepsViewControllerSB")
+        let homeUIBarButtonItem = UIBarButtonItem(image: UIImage(named: "gear.png"), style: .plain, target: self, action: #selector(RootViewController.toHome))
+        viewController.navigationItem.leftBarButtonItem  = homeUIBarButtonItem
+        homeUIBarButtonItem.tintColor = Colors.careKitRed.color
+        // Setup the controller's title and tab bar item
+        viewController.title = NSLocalizedString("Steps", comment: "")
+        viewController.tabBarItem = UITabBarItem(title: viewController.title, image: UIImage(named:"_0002_icon_SingleHead"), selectedImage: UIImage(named: "_0002_icon_SingleHead"))
+        
+        
+        return viewController
+    }
     
     fileprivate func createConnectViewController() -> OCKConnectViewController {
         
@@ -330,7 +460,7 @@ class RootViewController: UITabBarController {
         
     }
 
-    func toHome() -> () {
+    @objc func toHome() -> () {
         performSegue(withIdentifier: "ckReturnHome", sender: nil)
         
         //MagicalRecord.save({ (context) in  })
@@ -522,9 +652,9 @@ extension RootViewController: ORKTaskViewControllerDelegate {
                     dSymptomFocus.participantID =  username
                 }
                 dSymptomFocus.taskRunUUID = String(describing: taskViewController.result.taskRunUUID as UUID)
-                dSymptomFocus.timestamp = taskViewController.result.endDate as NSDate?
+                dSymptomFocus.timestamp = taskViewController.result.endDate as NSDate? as Date?
                 dSymptomFocus.timestampString = formatter.string(from: taskViewController.result.endDate)
-                dSymptomFocus.timestampEnd = taskViewController.result.endDate as NSDate?
+                dSymptomFocus.timestampEnd = taskViewController.result.endDate as NSDate? as Date?
                 dSymptomFocus.timestampEndString = formatter.string(from: taskViewController.result.endDate)
                 dSymptomFocus.dayString = dayFormatter.string(from: date!)
                 
@@ -575,7 +705,7 @@ extension RootViewController: ORKTaskViewControllerDelegate {
                                     //this is the today date but not necessarily the date for which this person is entering the data
                                     //we will will replace that date with the date the person is entering the data but keep the time that the perrson want to tenter the data for
                                     print("date. \(symptomDate) 0")
-                                    dSymptomFocus.date = symptomDate
+                                    dSymptomFocus.date = symptomDate as Date
                                     var aString:String = ""
                                     aString = formatter.string(from: symptomDate as Date)
                                     let mystring = aString.dropFirst(10)
@@ -767,9 +897,9 @@ extension RootViewController: ORKTaskViewControllerDelegate {
                     dAppetite.participantID =  username
                 }
                 dAppetite.taskRunUUID = String(describing: taskViewController.result.taskRunUUID as UUID)
-                dAppetite.timestamp = taskViewController.result.startDate as NSDate?
+                dAppetite.timestamp = taskViewController.result.startDate as NSDate? as Date?
                 dAppetite.timestampString = formatter.string(from: taskViewController.result.startDate)
-                dAppetite.timestampEnd = taskViewController.result.endDate as NSDate?
+                dAppetite.timestampEnd = taskViewController.result.endDate as NSDate? as Date?
                 dAppetite.timestampEndString = formatter.string(from: taskViewController.result.endDate)
                 dAppetite.dayString = dayFormatter.string(from: date!)
                 dAppetite.metric = "pct"
@@ -902,9 +1032,9 @@ extension RootViewController: ORKTaskViewControllerDelegate {
                     dGeneralHealth.participantID =  username
                 }
                 dGeneralHealth.taskRunUUID = String(describing: taskViewController.result.taskRunUUID as UUID)
-                dGeneralHealth.timestamp = taskViewController.result.startDate as NSDate?
+                dGeneralHealth.timestamp = taskViewController.result.startDate as NSDate? as Date?
                 dGeneralHealth.timestampString = formatter.string(from: taskViewController.result.startDate)
-                dGeneralHealth.timestampEnd = taskViewController.result.endDate as NSDate?
+                dGeneralHealth.timestampEnd = taskViewController.result.endDate as NSDate? as Date?
                 dGeneralHealth.timestampEndString = formatter.string(from: taskViewController.result.endDate)
                 dGeneralHealth.metric = "outOf10"
                 dGeneralHealth.dateString = formatter.string(from: date!)
@@ -1056,9 +1186,9 @@ extension RootViewController: ORKTaskViewControllerDelegate {
                     dStool.participantID =  username
                 }
                 dStool.taskRunUUID = String(describing: taskViewController.result.taskRunUUID as UUID)
-                dStool.timestamp = taskViewController.result.startDate as NSDate?
+                dStool.timestamp = taskViewController.result.startDate as NSDate? as Date? as Date?
                 dStool.timestampString = formatter.string(from: taskViewController.result.startDate)
-                dStool.timestampEnd = taskViewController.result.endDate as NSDate?
+                dStool.timestampEnd = taskViewController.result.endDate as NSDate? as Date?
                 dStool.timestampEndString = formatter.string(from: taskViewController.result.endDate)
                 dStool.dateString = formatter.string(from: date!)
                 dStool.dayString = dayFormatter.string(from: date!)
@@ -1311,9 +1441,9 @@ extension RootViewController: ORKTaskViewControllerDelegate {
                     dTemperature.participantID =  username
                 }
                 dTemperature.taskRunUUID = String(describing: taskViewController.result.taskRunUUID as UUID)
-                dTemperature.timestamp = taskViewController.result.startDate as NSDate?
+                dTemperature.timestamp = taskViewController.result.startDate as NSDate? as Date?
                 dTemperature.timestampString = formatter.string(from: taskViewController.result.startDate)
-                dTemperature.timestampEnd = taskViewController.result.endDate as NSDate?
+                dTemperature.timestampEnd = taskViewController.result.endDate as NSDate? as Date?
                 dTemperature.timestampEndString = formatter.string(from: taskViewController.result.endDate)
                 dTemperature.metric = "degF"
                 dTemperature.method = "oral"
@@ -1332,7 +1462,7 @@ extension RootViewController: ORKTaskViewControllerDelegate {
                             if questionResult.identifier == "temperature_eventTimeStamp" {
                                 let date = questionResult.answer! as? NSDate
                                 print("date. \(String(describing: date)) 0")
-                                dTemperature.date = date
+                                dTemperature.date = date as Date?
                                 dTemperature.dateString = formatter.string(from: date! as Date)
                                 //print("dateString. \(String(describing: dTemperature.dateString)) 0") //this the date the user reports as the event date and time.
                             }
@@ -1377,9 +1507,9 @@ extension RootViewController: ORKTaskViewControllerDelegate {
                     dscdPain.participantID =  username
                 }
                 dscdPain.taskRunUUID = String(describing: taskViewController.result.taskRunUUID as UUID)
-                dscdPain.timestamp = taskViewController.result.startDate as NSDate?
+                dscdPain.timestamp = taskViewController.result.startDate as NSDate? as Date?
                 dscdPain.timestampString = formatter.string(from: taskViewController.result.startDate)
-                dscdPain.timestampEnd = taskViewController.result.endDate as NSDate?
+                dscdPain.timestampEnd = taskViewController.result.endDate as NSDate? as Date?
                 dscdPain.timestampEndString = formatter.string(from: taskViewController.result.endDate)
                 dscdPain.metric = "outOf10"
                 dscdPain.dateString = formatter.string(from: date!)
@@ -1405,7 +1535,7 @@ extension RootViewController: ORKTaskViewControllerDelegate {
                                     //this is the today date but not necessarily the date for which this person is entering the data
                                     //we will will replace that date with the date the person is entering the data but keep the time that the perrson want to tenter the data for
                                     print("date. \(date) 0")
-                                    dscdPain.date = date
+                                    dscdPain.date = date as Date
                                     var aString:String = ""
                                     aString = formatter.string(from: date as Date)
                                     let mystring = aString.dropFirst(10)
@@ -1500,9 +1630,9 @@ extension RootViewController: ORKTaskViewControllerDelegate {
                     dMenstruation.participantID =  username
                 }
                 dMenstruation.taskRunUUID = String(describing: taskViewController.result.taskRunUUID as UUID)
-                dMenstruation.timestamp = taskViewController.result.startDate as NSDate?
+                dMenstruation.timestamp = taskViewController.result.startDate as NSDate? as Date?
                 dMenstruation.timestampString = formatter.string(from: taskViewController.result.startDate)
-                dMenstruation.timestampEnd = taskViewController.result.endDate as NSDate?
+                dMenstruation.timestampEnd = taskViewController.result.endDate as NSDate? as Date?
                 dMenstruation.timestampEndString = formatter.string(from: taskViewController.result.endDate)
                 dMenstruation.dayString = dayFormatter.string(from: date!)
                 
@@ -1517,7 +1647,7 @@ extension RootViewController: ORKTaskViewControllerDelegate {
                                 
                                 let date = questionResult.answer! as? NSDate
                                 //print("date. \(date) 0")
-                                dMenstruation.date = date
+                                dMenstruation.date = date as Date?
                                 dMenstruation.dateString = formatter.string(from: date! as Date)
                                 //print("dateString. \(dMenstruation.dateString) 0") //this the date the user reports as the event date and time.
                             }
@@ -1700,7 +1830,7 @@ extension RootViewController: ORKTaskViewControllerDelegate {
         }
         
         dGeoData.taskUUID = String(describing: taskViewController.result.taskRunUUID as UUID)
-        dGeoData.timestamp = carePlanResult.creationDate as NSDate?
+        dGeoData.timestamp = carePlanResult.creationDate as NSDate? as Date?
         dGeoData.timestampString = formatter.string(from: taskViewController.result.startDate)
         listDataManager.saveCareData()
         
@@ -1912,4 +2042,15 @@ extension RootViewController: CLLocationManagerDelegate {
         }
         
     }
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToOptionalNSAttributedStringKeyDictionary(_ input: [String: Any]?) -> [NSAttributedString.Key: Any]? {
+	guard let input = input else { return nil }
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKey(_ input: NSAttributedString.Key) -> String {
+	return input.rawValue
 }
