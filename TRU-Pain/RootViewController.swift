@@ -99,11 +99,14 @@ class RootViewController: UITabBarController {
     }()
     
     
-    let health: HKHealthStore = HKHealthStore()
+    let healthStore: HKHealthStore = HKHealthStore()
     let heartRateUnit:HKUnit = HKUnit(from: "count/min")
     let heartRateType:HKQuantityType   = HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.heartRate)!
     var heartRateQuery:HKQuery?
     
+    
+    var activityArray:[[String]]?
+    var sleepActivityArray:[[String]]?
     // MARK: Initialization
     
     required init?(coder aDecoder: NSCoder) {
@@ -170,7 +173,7 @@ class RootViewController: UITabBarController {
         symptomTrackerViewController = createSymptomTrackerViewController()
         insightsViewController = createInsightsViewController()
         connectViewController = createConnectViewController()
-        stepsViewController = createStepsViewController()
+        //stepsViewController = createStepsViewController()
         
         
         self.viewControllers = [
@@ -178,7 +181,7 @@ class RootViewController: UITabBarController {
             UINavigationController(rootViewController: symptomTrackerViewController),
             UINavigationController(rootViewController: insightsViewController),
             UINavigationController(rootViewController: connectViewController),
-            UINavigationController(rootViewController: stepsViewController),
+           // UINavigationController(rootViewController: stepsViewController),
         ]
         storeManager.delegate = self
         //watchManager = WatchConnectivityManager(withStore: storeManager.store)
@@ -218,7 +221,7 @@ class RootViewController: UITabBarController {
         let writingTypes:Set = Set( [heartRateType] )
         
         //auth request
-        health.requestAuthorization(toShare: writingTypes, read: readingTypes) { (success, error) -> Void in
+        healthStore.requestAuthorization(toShare: writingTypes, read: readingTypes) { (success, error) -> Void in
             
             if error != nil
             {
@@ -226,67 +229,29 @@ class RootViewController: UITabBarController {
             }
             else if success
             {
-                self.readHeartRateData()
+                //self.readHeartRateData()
+                
+                let todayDate = Date() //
+                let calendar = Calendar.current
+                var ninetyDaysAgoDate: Date?
+                ninetyDaysAgoDate = calendar.date(byAdding: .day,
+                                                  value: -10,
+                                                  to: todayDate)
+                
+                let x = UploadsViewController()
+                x.getHKHeartRateData(ninetyDaysAgoDate!)
+                x.getHKStepData(ninetyDaysAgoDate!)
+                x.getHKHeartRateVariabilityData(ninetyDaysAgoDate!)
+                self.retrieveSleepAnalysis(startDate: ninetyDaysAgoDate!)
+                
+                
             }
         }//eo-request
     }
     
-    /*Method to get todays heart rate - this only reads data from health kit. */
-    func readHeartRateData() -> Void {
-        print("reading heart rate data  ")
-        // STEP 9.1: just as in STEP 6, we're telling the `HealthKitStore`
-        // that we're interested in reading heart rate data
-        let heartRateType = HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.heartRate)!
-        
-        // STEP 9.2: define a query for "recent" heart rate data;
-        // in pseudo-SQL, this would look like:
-        //
-        // SELECT bpm FROM HealthKitStore WHERE qtyTypeID = '.heartRate';
-        
-        //predicate
-//        let calendar = NSCalendar.current
-//        let now = NSDate()
-//        let components = calendar.dateComponents([.year,.month,.day], from: now as Date)
-//        guard let startDate:NSDate = calendar.date(from: components) as NSDate? else {return}
-//        let endDate:NSDate? = calendar.date(byAdding: components, value: 1, to: startDate)
-//        //dateByAddingUnit(.Day, value: 1, toDate: startDate, options: [])
-//        let predicate = HKQuery.predicateForSamplesWithStartDate(startDate as Date, endDate: endDate as Date?, options: .None)
+    
 
-        
-        let query = HKAnchoredObjectQuery(type: heartRateType, predicate: nil, anchor: nil, limit: HKObjectQueryNoLimit) {
-            
-            
-            
-            (query, samplesOrNil, deletedObjectsOrNil, newAnchor, errorOrNil) in
-            
-            if let samples = samplesOrNil {
-                
-                for heartRateSamples in samples {
-                    print("heartRateSamples: \n\(heartRateSamples)")
-                }
-                
-            } else {
-                print("No heart rate sample available.")
-            }
-            
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        }
-        
-        // STEP 9.3: execute the query for heart rate data
-        health.execute(query)
-        
-    }
+
     
 //    /*used only for testing, prints heart rate info */
 //    private func printHeartRateInfo(results:[HKSample]?)
@@ -599,8 +564,146 @@ extension RootViewController: ORKTaskViewControllerDelegate {
     }
     
     
+    
+    
+    @objc func retrieveSleepAnalysis(startDate:Date) {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        
+        //let standardDefaults = UserDefaults.standard
+        
+        self.sleepActivityArray = [[""]]
+        self.sleepActivityArray?.remove(at: 0)
+        let endDate = NSDate()
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate as Date, options: .strictEndDate)
+        print("get sleep data")
+        // first, we define the object type we want
+        if let sleepType = HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis) {
+            
+            // Use a sortDescriptor to get the recent data first
+            let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
+            
+            // we create our query with a block completion to execute
+            let query = HKSampleQuery(sampleType: sleepType, predicate: predicate, limit: 365, sortDescriptors: [sortDescriptor]) { (query, tmpResult, error) -> Void in
+                
+                if error != nil {
+                    print("can't get any sleep data")
+                    return
+                    
+                }
+                
+                if let result = tmpResult {
+                    let fx = UploadsViewController()
+                    // do something with my data
+                    /*
+                     NSArray *arHeader = @[
+                     "deviceName",
+                     "userName",
+                     "StartDate",
+                     "EndDate",
+                     "inBedOrAsleep",
+                     "AppName",
+                     "DeviceDescription",
+                     "iOSVersion",
+                     "sampleDeviceName",
+                     "sampleDeviceHardwareVersion",
+                     "sampleDeviceModel",
+                     "sampleUUID",
+                     "sampleSourceRevisionDescription"
+                     ];*/
+                    let arHeader  = [
+                        "deviceName",
+                        "userName",
+                        "StartDate",
+                        "EndDate",
+                        "inBedOrAsleep",
+                        "AppName",
+                        "DeviceDescription",
+                        "iOSVersion",
+                        "sampleDeviceName",
+                        "sampleDeviceHardwareVersion",
+                        "sampleDeviceModel",
+                        "sampleUUID",
+                        "sampleSourceRevisionDescription"
+                    ]
+                    for item in result {
+                        var ar:[String]?
+                        var dictionary:[String:Any]?
+                        
+                        if let sample = item as? HKCategorySample {
+                            let value = (sample.value == HKCategoryValueSleepAnalysis.inBed.rawValue) ? "InBed" : "Asleep"
+                            
+                            var userName  = fx.userName()
+                            if userName == ""
+                            {
+                                userName = "AppleUser@icloud.com"
+                                
+                            }
+                            
+                            var sampleDeviceName = String(describing:sample.device?.name)
+                            if sampleDeviceName == "" {sampleDeviceName = "-99"}
+                            
+                            var sampleDeviceHardwareVersion = String(describing:sample.device?.hardwareVersion)
+                            if sampleDeviceHardwareVersion == "" {sampleDeviceHardwareVersion = "-99"}
+                            
+                            var sampleDeviceModel = String(describing:sample.device?.model)
+                            if sampleDeviceModel == "" {sampleDeviceModel = "-99"}
+                            
+                            var sampleUUID = String(describing:sample.uuid.uuidString)
+                            if sampleUUID == "" {sampleUUID = "-99"}
+                            
+                            var sampleSourceRevisionDescription = String(describing:sample.sourceRevision.source.description)
+                            if sampleSourceRevisionDescription == "" {sampleSourceRevisionDescription = "-99"}
+                            
+                            
+                            
+                            ar = [self.removeSpecialCharsFromString(text: UIDevice.current.name),
+                                  userName,
+                                  formatter.string(from:sample.startDate),
+                                  formatter.string(from:sample.endDate),String(describing:value),
+                                  self.removeSpecialCharsFromString(text: sample.sourceRevision.source.name),
+                                  self.removeSpecialCharsFromString(text: HKDevice.description()),
+                                  sample.sourceRevision.version!,
+                                  sampleDeviceName,
+                                  sampleDeviceHardwareVersion,
+                                  sampleDeviceModel,
+                                  sampleUUID,
+                                  sampleSourceRevisionDescription
+                            ]
+                            
+                            let zipArHeader = zip(arHeader,ar!)
+                            
+                            
+                            self.sleepActivityArray?.append(ar!)
+                        }
+                    }
+                    
+                    
+                        fx.getHKSleepData(self.sleepActivityArray!)
+                        
+                    
+                }
+            }
+            
+            self.healthStore.execute(query)
+        }
+    }
+    
+    
+    
+    
+    func removeSpecialCharsFromString(text: String) -> String {
+        let okayChars : Set<Character> =
+            Set("abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLKMNOPQRSTUVWXYZ1234567890+-*=(),.:!_[]".characters)
+        return String(text.characters.filter {okayChars.contains($0) })
+    }
+    
     /// Called with then user completes a presented `ORKTaskViewController`.
     func taskViewController(_ taskViewController: ORKTaskViewController, didFinishWith reason: ORKTaskViewControllerFinishReason, error: Error?) {
+        
+        
+        
+        
         defer {
             dismiss(animated: true, completion: nil)
         }

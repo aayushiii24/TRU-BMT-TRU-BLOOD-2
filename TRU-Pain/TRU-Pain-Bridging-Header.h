@@ -6,6 +6,7 @@
 #import <CoreData+MagicalRecord.h>
 #import "SAMKeychain.h"
 #import "UploadApi.h"
+#import "UploadsViewController.h"
 //#import <Parse/Parse.h>
 //#import "Parse.h"
 
