@@ -527,7 +527,7 @@ static NSString * const kwShareFileNameDailySleepAnalysis = @"sleepAnalysis.csv"
     NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
     
     NSDate* selectedStartDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
-    NSLog(@"Yesterday destination date: %@", selectedStartDate);
+    NSLog(@"Yesterday destination date UploadsVC @line 530: %@", selectedStartDate);
     
     //    NSDate *startDate = selectedStartDate;
     //    NSDate *endDate = [selectedStartDate dateByAddingTimeInterval:60*60*24-1];
@@ -798,7 +798,7 @@ static NSString * const kwShareFileNameDailySleepAnalysis = @"sleepAnalysis.csv"
     NSString *authValue = [NSString stringWithFormat:@"Basic %@", [authData base64EncodedStringWithOptions:0]];
     
     // Session Configuration
-    NSURLSessionConfiguration *sessionConfiguration = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:@"com.sicklesoft.ITP.BackgroundSession.Wearable"];
+    NSURLSessionConfiguration *sessionConfiguration = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:@"com.sicklesoft.DukBMT.Up.BackgroundSession.Wearable"];
     
     //set additional header for auth
     [sessionConfiguration setHTTPAdditionalHeaders:@{@"Authorization": authValue}];

@@ -164,14 +164,14 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
         alert.addTextField { (textField) in
             textField.keyboardType = .emailAddress
             textField.placeholder = "email"
-            textField.text = "AppleUser@icloud.com"
+            //textField.text = "scdi@icloud.com"
         }
         
         alert.addTextField { (textField) in
             textField.keyboardType = .default
             textField.isSecureTextEntry = true
             textField.placeholder = "password"
-            textField.text = "Welcome11"
+           //textField.text = "Welcome8_"
         }
         
         
@@ -216,14 +216,14 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
         alert.addTextField { (textField) in
             textField.keyboardType = .emailAddress
             textField.placeholder = "email"
-            textField.text = "AppleUser@icloud.com"
+            //textField.text = "scdi@icloud.com"
         }
         
         alert.addTextField { (textField) in
             textField.keyboardType = .default
             textField.isSecureTextEntry = true
             textField.placeholder = "password"
-            textField.text = "Welcome11"
+            //textField.text = "Welcome8_"
         }
         
         //trupain@icloud.com 7YmKnV2oa5UCc3wFJN40MCozXwx2
@@ -254,7 +254,7 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
     
     func update(user: String?, password: String?, study: String?) {
         let standardDefaults = UserDefaults.standard
-        let studyName = study?.uppercased()
+        //let studyName = study?.uppercased()
         let credential = URLCredential(user: user!, password: password!, persistence: .none)
         //Alamofire.request("https://scdi.sharefile-webdav.com:443/Dev/SMARTa/\(user!)/\(studyName!)/profile.json")
             //change generic profile data to Onboard/BMT.json or Onboard/VOPAM.json or Onboard/SCD.json or Onboard/SCDF.json
@@ -263,19 +263,19 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
             //Ensure that user has download access to the profile
             //If register button is used esure that the database for CareKit is cleared to be reprogrammed
             //Should a dump upload of current data occur in the background prior to wiping out CareKit
-        Alamofire.request("https://scdi.sharefile-webdav.com:443/Onboard/\(studyName!).json")
+        Alamofire.request("https://scdi.sharefile-webdav.com:443/Dev/SMARTa/\(user!)/Preferences/preference.json")
             .authenticate(usingCredential: credential)
             .responseJSON { response in
-                print("debugPrint(response.result)")
-                debugPrint(response.result)
+                print("debugPrint(response.result.value)")
+                debugPrint(response.result.value)
                 print("debugPrint(response.data)")
                 debugPrint(response.data ?? "no data")
             
-                guard String(describing: response.result).lowercased().range(of:"failure") == nil else {
-                    print("registration failed")
-                    self.registrationFailed()
-                    return
-                }
+//                guard String(describing: response.result).lowercased().range(of:"failure") == nil else {
+//                    print("registration failed")
+//                    self.registrationFailed()
+//                    return
+//                }
                     print("Yeah, response not nil")
                     
                     self.loginButton.isHidden = false
@@ -302,6 +302,12 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
                             }
                             if key == "Study" {
                                 standardDefaults.set(value, forKey: "Study")
+                            }
+                            if key == "DaysOfData" {
+                                standardDefaults.set(value, forKey: "DaysOfData")
+                            }
+                            if key == "DaysOfDataNum" {
+                                standardDefaults.set(value, forKey: "DaysOfDataNum")
                             }
                         }
                     }

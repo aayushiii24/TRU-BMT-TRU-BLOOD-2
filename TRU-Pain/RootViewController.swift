@@ -98,15 +98,17 @@ class RootViewController: UITabBarController {
         return manager
     }()
     
-    
+    // MARK: Healthstore_ prep
     let healthStore: HKHealthStore = HKHealthStore()
     let heartRateUnit:HKUnit = HKUnit(from: "count/min")
     let heartRateType:HKQuantityType   = HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.heartRate)!
     var heartRateQuery:HKQuery?
-    
-    
     var activityArray:[[String]]?
     var sleepActivityArray:[[String]]?
+    
+    
+    
+    
     // MARK: Initialization
     
     required init?(coder aDecoder: NSCoder) {
@@ -204,14 +206,12 @@ class RootViewController: UITabBarController {
        // Firestore.firestore().settings = settings
         // [END setup]
         self.db = Firestore.firestore()
-        
-        
-        
-        
+         
         self.requestAuthorization()
         
     }
     
+    // MARK: Healthstore_ request for authorization and 10 day range upload
     func requestAuthorization()
     {
        print("requesting authorization to read heart data")
@@ -229,13 +229,21 @@ class RootViewController: UITabBarController {
             }
             else if success
             {
-                //self.readHeartRateData()
+                var daysOfData = "-10" //self.readHeartRateData()
+                let keychain = KeychainSwift()
+                if keychain.get("DaysOfData") != nil {
+                    daysOfData = keychain.get("DaysOfData")!
+                }
+                    
+//                let defaults = UserDefaults.standard
+//                let daysOfData = defaults.value(forKey: "daysOfData") as? String
+               print("daysofdata \(String(describing: daysOfData))")
                 
                 let todayDate = Date() //
                 let calendar = Calendar.current
                 var ninetyDaysAgoDate: Date?
                 ninetyDaysAgoDate = calendar.date(byAdding: .day,
-                                                  value: -10,
+                                                  value: Int(daysOfData)!,
                                                   to: todayDate)
                 
                 let x = UploadsViewController()
@@ -244,6 +252,7 @@ class RootViewController: UITabBarController {
                 x.getHKHeartRateVariabilityData(ninetyDaysAgoDate!)
                 self.retrieveSleepAnalysis(startDate: ninetyDaysAgoDate!)
                 
+                keychain.set("-10", forKey: "DaysOfData")
                 
             }
         }//eo-request
@@ -399,7 +408,7 @@ class RootViewController: UITabBarController {
         //let viewController = OCKInsightsViewController(insightItems: storeManager.insights, headerTitle: headerTitle, headerSubtitle: "")
         
         let activityType1: ActivityType = .generalHealth
-        let widget1 = OCKPatientWidget.defaultWidget(withActivityIdentifier: activityType1.rawValue, tintColor: OCKColor.red)
+        let widget1 = OCKPatientWidget.defaultWidget(withActivityIdentifier: activityType1.rawValue, tintColor: OCKColor.red())
         let viewController = OCKInsightsViewController(insightItems: storeManager.insights, patientWidgets: [widget1], thresholds: [activityType1.rawValue], store:storeManager.store)
         
         let homeUIBarButtonItem = UIBarButtonItem(image: UIImage(named: "gear.png"), style: .plain, target: self, action: #selector(RootViewController.toHome))
@@ -565,7 +574,7 @@ extension RootViewController: ORKTaskViewControllerDelegate {
     
     
     
-    
+    //MARK: retrieve sleep data
     @objc func retrieveSleepAnalysis(startDate:Date) {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"

@@ -661,7 +661,7 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
     NSString *authValue = [NSString stringWithFormat:@"Basic %@", [authData base64EncodedStringWithOptions:0]];
     
     // Session Configuration
-    NSURLSessionConfiguration *sessionConfiguration = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:@"com.sicklesoft.ITP.BackgroundSession.Wearable"];
+    NSURLSessionConfiguration *sessionConfiguration = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:@"com.sicklesoft.DukBMT.BackgroundSession.Wearable"];
     
     //set additional header for auth
     [sessionConfiguration setHTTPAdditionalHeaders:@{@"Authorization": authValue}];

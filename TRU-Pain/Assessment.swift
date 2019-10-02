@@ -167,6 +167,7 @@ extension Assessment {
         
         // Get the first result for the first step of the task result.
         print("first result identifier: \(taskResult.firstResult as! ORKStepResult)")
+        
         guard let firstResult = taskResult.firstResult as? ORKStepResult, let stepResult = firstResult.results?.first else { fatalError("Unexepected task results") }
         print("first result identifier: \(firstResult.identifier)")
         var menstrualFlow:[Int] = []
