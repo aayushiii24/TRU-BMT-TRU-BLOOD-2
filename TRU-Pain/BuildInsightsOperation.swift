@@ -130,13 +130,13 @@ class BuildInsightsOperation: Operation {
         let now = Date()
         
         var components = DateComponents()
-        components.day = -90
+        components.day = -7
         let startDate = calendar.weekDatesForDate(calendar.date(byAdding: components as DateComponents, to: now)!).start
         
         var totalEventCount = 0
         var completedEventCount = 0
         
-        for offset in (0...90).reversed() {
+        for offset in (0...7).reversed() {
             components.day = offset
             let dayDate = calendar.date(byAdding: components as DateComponents, to: startDate)!
             let dayComponents = calendar.dateComponents([.year, .month, .day, .era], from: dayDate)
@@ -175,13 +175,13 @@ class BuildInsightsOperation: Operation {
         let now = Date()
         
         var components = DateComponents()
-        components.day = -90
+        components.day = -7
         let startDate = calendar.weekDatesForDate(calendar.date(byAdding: components as DateComponents, to: now)!).start
         
         var totalEventCount = 0
         var completedEventCount = 0
         
-        for offset in (0...90).reversed() {
+        for offset in (0...7).reversed() {
             components.day = offset
             let dayDate = calendar.date(byAdding: components as DateComponents, to: startDate)!
             let dayComponents = calendar.dateComponents([.year, .month, .day, .era], from: dayDate)
@@ -220,13 +220,13 @@ class BuildInsightsOperation: Operation {
         let now = Date()
         
         var components = DateComponents()
-        components.day = -90
+        components.day = -7
         let startDate = calendar.weekDatesForDate(calendar.date(byAdding: components as DateComponents, to: now)!).start
         
         var totalEventCount = 0
         var completedEventCount = 0
         
-        for offset in (0...90).reversed() {
+        for offset in (0...7).reversed() {
             components.day = offset
             let dayDate = calendar.date(byAdding: components as DateComponents, to: startDate)!
             let dayComponents = calendar.dateComponents([.year, .month, .day, .era], from: dayDate)
@@ -265,13 +265,13 @@ class BuildInsightsOperation: Operation {
         let now = Date()
         
         var components = DateComponents()
-        components.day = -90
+        components.day = -7
         let startDate = calendar.weekDatesForDate(calendar.date(byAdding: components as DateComponents, to: now)!).start
         
         var totalEventCount = 0
         var completedEventCount = 0
         
-        for offset in (0...90).reversed() {
+        for offset in (0...7).reversed() {
             components.day = offset
             let dayDate = calendar.date(byAdding: components as DateComponents, to: startDate)!
             let dayComponents = calendar.dateComponents([.year, .month, .day, .era], from: dayDate)
@@ -310,13 +310,13 @@ class BuildInsightsOperation: Operation {
         let now = Date()
         
         var components = DateComponents()
-        components.day = -90
+        components.day = -7
         let startDate = calendar.weekDatesForDate(calendar.date(byAdding: components as DateComponents, to: now)!).start
         
         var totalEventCount = 0
         var completedEventCount = 0
         
-        for offset in (0...90).reversed() {
+        for offset in (0...7).reversed() {
             components.day = offset
             let dayDate = calendar.date(byAdding: components as DateComponents, to: startDate)!
             let dayComponents = calendar.dateComponents([.year, .month, .day, .era], from: dayDate)
@@ -355,13 +355,13 @@ class BuildInsightsOperation: Operation {
         let now = Date()
         
         var components = DateComponents()
-        components.day = -90
+        components.day = -7
         let startDate = calendar.weekDatesForDate(calendar.date(byAdding: components as DateComponents, to: now)!).start
         
         var totalEventCount = 0
         var completedEventCount = 0
         
-        for offset in (0...90).reversed() {
+        for offset in (0...7).reversed() {
             components.day = offset
             let dayDate = calendar.date(byAdding: components as DateComponents, to: startDate)!
             let dayComponents = calendar.dateComponents([.year, .month, .day, .era], from: dayDate)
@@ -467,7 +467,7 @@ class BuildInsightsOperation: Operation {
         let utcDateFormatter = DateFormatter()
         utcDateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
         
-        
+        var uploadOrNot:Bool = false
         for offset in (0...90).reversed() {
             
             let settings = FirestoreSettings()
@@ -693,44 +693,77 @@ class BuildInsightsOperation: Operation {
                     let source = snapshot.metadata.isFromCache ? "local cache" : "server"
                     print("Metadata: Data fetched from \(source)")
             }
+            let number = Int.random(in: 0 ..< 10)
+            //Dispatch STARTS
             
-            let handle = Auth.auth().addStateDidChangeListener { (auth, user) in
-                if let user = user {
-                    let uid = user.uid
-                    let email = user.email
-                    //let photoURL = user.photoURL
-                    careCardDiary["userID"] = uid
-                    careCardDiary["userEmail"] = email
-                    careCardDiary["author_id"] = uid
-                    careCardDiary["dataOfType"] = "careCardDiary"
-                    careCardDiary["dayOfWeekOfEvent"] = dayOfWeek
-                    careCardDiary["monthOfYearOfEvent"] = monthOfYear
-                    careCardDiary["yearOfEvent"] = yearOfEvent
-                    careCardDiary["dateOfEvent"] = dateString
-                    careCardDiary["appMode"] = self.appMode(email: email!)
-                    
-                    
-                    if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
-                        print("version of app \(version)")
-                        careCardDiary["appVersion"] = version
-                    }
-                    if let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
-                        print("version of app \(build)")
-                        careCardDiary["appBuild"] = build
-                    }
-                    let idForFirestore = "CareCard." + dateString + "." + uid
-                    
-                    var ref: DocumentReference? = nil
-                    self.db.collection("cares").document(idForFirestore).setData(careCardDiary) { err in
+            
+            switch number {
+            case 0:
+                uploadOrNot = false
+            case 1:
+                uploadOrNot = false
+            case 2:
+                uploadOrNot = false
+            case 3:
+                uploadOrNot = true
+            case 4:
+                uploadOrNot = false
+            case 5:
+                uploadOrNot = true
+            case 6:
+                uploadOrNot = false
+            case 7:
+                uploadOrNot = false
+            case 8:
+                uploadOrNot = true
+            case 9:
+                uploadOrNot = false
+                
+            default:
+                print("SKIP")
+            }
+                
+          
+            if uploadOrNot {
+                let handle = Auth.auth().addStateDidChangeListener { (auth, user) in
+                    if let user = user {
+                        let uid = user.uid
+                        let email = user.email
+                        //let photoURL = user.photoURL
+                        careCardDiary["userID"] = uid
+                        careCardDiary["userEmail"] = email
+                        careCardDiary["author_id"] = uid
+                        careCardDiary["dataOfType"] = "careCardDiary"
+                        careCardDiary["dayOfWeekOfEvent"] = dayOfWeek
+                        careCardDiary["monthOfYearOfEvent"] = monthOfYear
+                        careCardDiary["yearOfEvent"] = yearOfEvent
+                        careCardDiary["dateOfEvent"] = dateString
+                        careCardDiary["appMode"] = self.appMode(email: email!)
                         
-                            if let err = err {
-                                print("Error writing document: \(err)")
-                            } else {
-                                print("Document successfully written!")
-                            }
+                        
+                        if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+                            print("version of app \(version)")
+                            careCardDiary["appVersion"] = version
+                        }
+                        if let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
+                            print("version of app \(build)")
+                            careCardDiary["appBuild"] = build
+                        }
+                        let idForFirestore = "CareCard." + dateString + "." + uid
+                        
+                        var ref: DocumentReference? = nil
+                        self.db.collection("cares").document(idForFirestore).setData(careCardDiary) { err in
+                            
+                                if let err = err {
+                                    print("Error writing document: \(err)")
+                                } else {
+                                    print("Document successfully written!")
+                                }
+                        }
                     }
                 }
             }
+
         }
         
         
@@ -752,8 +785,13 @@ class BuildInsightsOperation: Operation {
         
         //upload array of arrays as a CSV file each a seection is made from the health card screen
         let uploadSymptomFocus = UploadApi()
-        uploadSymptomFocus.writeAndUploadCSVToSharefile(forSymptomFocus: archive, "chartsData.csv")
-        print("archive.append(someArray ) \(archive)")
+        
+        
+        if !uploadOrNot {
+            uploadSymptomFocus.writeAndUploadCSVToSharefile(forSymptomFocus: archive, "chartsData.csv")
+            print("archive.append(someArray ) \(archive)")
+        }
+        
         
         // Create a `OCKBarSeries` for each set of data.
 //        let generalHealthBarSeries = OCKBarSeries(title: "Health", values: generalHealthValues as [NSNumber], valueLabels: generalHealthLabels, tintColor: Colors.blue.color)

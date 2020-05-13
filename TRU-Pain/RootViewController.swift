@@ -326,11 +326,11 @@ class RootViewController: UITabBarController {
             case 9:
                 self.retrieveSleepAnalysis(startDate: daysAgoDate!)
             default:
-                print("Take a break \(number)")
+                print("SKIP")
             }
             
         }
-        print("Take a break \(number)")
+        print("Take a number \(number)")
     }//end of requestAuthorization
     
     
