@@ -20,6 +20,10 @@ import HealthKit
 // import FirebaseInstanceID
 // This was uploaded to iTunesConnect for testing on 4/22/2018. Might get rejected for remote notification stuff.
 
+
+typealias AccessRequestCallback = (_ success: Bool, _ error: NSError?) -> Void
+
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 
@@ -179,7 +183,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                    HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.basalEnergyBurned)!,
                    HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.activeEnergyBurned)!,
                    HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!,
-                   HKObjectType.workoutType()
+                   HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.oxygenSaturation)!
+//                   HKObjectType.workoutType()
         )
     }
     

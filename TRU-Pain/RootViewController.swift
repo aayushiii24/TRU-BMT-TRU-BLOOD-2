@@ -106,8 +106,26 @@ class RootViewController: UITabBarController {
     var activityArray:[[String]]?
     var sleepActivityArray:[[String]]?
     
+    //For wearable device data
+    let  UIDeviceIdentifierForVendor = (UIDevice.current.identifierForVendor?.uuidString ?? "UNK_UIDeviceIdentifierForVendor") as String
+    let utc_date_formatter = DateFormatter()
     
-    
+    /// - returns: A set of HKObjectType.
+    private func dataTypesToRead() -> Set<HKObjectType> {
+            return Set(arrayLiteral:
+                HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.stepCount)!,
+                HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.heartRate)!,
+                HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.heartRateVariabilitySDNN)!,
+                HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.oxygenSaturation)!,
+                HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!
+                //HKObjectType.activitySummaryType()//https://www.devfright.com/the-healthkit-hkactivitysummaryquery/
+        )
+    }
+    private enum HealthkitSetupError: Error {
+        case notAvailableOnDevice
+        case dataTypeNotAvailable
+    }
+    //END Setting for Wearable devices varaibles
     
     // MARK: Initialization
     
@@ -200,20 +218,70 @@ class RootViewController: UITabBarController {
         //Getting data from the store
         //self.viewSymptoms()
         
-        // [START FIREBASE setup]
-       // let settings = FirestoreSettings()
-        
-       // Firestore.firestore().settings = settings
-        // [END setup]
+        // [START FIRESTORE setup]
+        let settings = FirestoreSettings()
+        Firestore.firestore().settings = settings
         self.db = Firestore.firestore()
-         
-        self.requestAuthorization()
+        // [END setup]
+        
+        utc_date_formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        
+        
+        let types = Base.createSampleTypeSet()
+        
+        self.healthStore.requestAuthorization(toShare: nil, read: types, completion: { (success, error) in
+            if !success {
+                // handle errors
+                print("something went wrong")
+            } else {
+                print("something went well")
+                
+                
+            }
+        })
+ 
+    }
+    func requestAccessWithCompletion(completion: AccessRequestCallback) {
+        
+        guard HKHealthStore.isHealthDataAvailable() else {
+            completion(false, HealthkitSetupError.notAvailableOnDevice as NSError)
+          return
+        }
+        
+        
+        //let writeDataTypes = dataTypesToWrite()
+        let readDataTypes = dataTypesToRead()
+
+        self.healthStore.requestAuthorization(toShare: nil, read: readDataTypes, completion: { (success, error) in
+            
+            if success {
+                debugPrint("Access to - HK granted")
+                self.performAnchoredQueryStepCount()
+                self.performAnchoredQueryForHeartRate()
+                self.performAnchoredQueryForHeartRateVariability()
+                self.performAnchoredQueryForRestingHeartRate()
+                self.performAnchoredQueryForAverageWalkingHeartRate()
+                self.performAnchoredQueryForOxygenSaturation()
+                self.performAnchoredQueryForSleepAnalysis()
+            } else {
+                print("Error with HK authorization: \(String(describing: error))")
+            }
+        })
+    }
+    override func viewDidAppear(_ animated: Bool) {
+        
+        
+        self.requestAccessWithCompletion { (success, error) in
+            if error != nil {
+                print("access granted to HK")
+                
+            }
+        }
         
     }
-    
     // MARK: Healthstore_ request for authorization and 10 day range upload
     
-    
+
    
     func requestAuthorization()
     {
@@ -2206,7 +2274,1715 @@ extension RootViewController: ORKTaskViewControllerDelegate {
     }
     
     
+        func performAnchoredQueryForHeartRate() {
+            
+            guard let heartRateType = HKObjectType.quantityType(forIdentifier: .heartRate) else {
+                fatalError("*** Unable to get the heart rate type ***")
+            }
+            
+            
+            var anchor = HKQueryAnchor.init(fromValue: 0)
+            
+            if UserDefaults.standard.object(forKey: "HeartAnchor") != nil {
+                let data = UserDefaults.standard.object(forKey: "HeartAnchor") as! Data
+                do {
+                    anchor = try NSKeyedUnarchiver.unarchivedObject(ofClass: HKQueryAnchor.self, from: data)!
+                } catch {
+                    print("Unable to store new anchor")
+                }
+                
+            }
+            
+            let query = HKAnchoredObjectQuery(type: heartRateType,
+                                              predicate: nil,
+                                              anchor: anchor,
+                                              limit: HKObjectQueryNoLimit) { (query, samplesOrNil, deletedObjectsOrNil, newAnchor, errorOrNil) in
+                                                guard let samples = samplesOrNil, let deletedObjects = deletedObjectsOrNil else {
+                                                    fatalError("*** An error occurred during the initial query: \(errorOrNil!.localizedDescription) ***")
+                                                }
+                                                
+                                                anchor = newAnchor!
+                                                do {
+                                                    let data = try NSKeyedArchiver.archivedData(withRootObject: anchor, requiringSecureCoding: true)
+                                                    UserDefaults.standard.set(data, forKey: "HeartAnchor")
+                                                } catch {
+                                                    print("Unable to store new heart anchor")
+                                                }
+                                                
+                                                
+                                                //                                           var dataDictionary = [String: Any]()
+                                                
+                                                
+                                                //Dispatch STARTS
+                                                DispatchQueue.global(qos: .background).async {
+                                                    
+                                                    //NEW HEART SAMPLES START
+                                                    for heartRateSample in samples {
+                                                        
+                                                        print("Samples: Endate Date \(heartRateSample.endDate) startDate: \(heartRateSample.startDate) \(heartRateSample.uuid) \(String(describing: heartRateSample.value(forKey: "metadata")))")
+                                                        
+                                                        let result = heartRateSample as! HKQuantitySample
+                                                        
+                                                        let heartRateBPM = result.quantity.doubleValue(for: HKUnit(from: "count/min"))
+                                                        let heartRateBPMUnit = "count/min"
+                                                        
+                                                        //                let deviceUUID = heartRateSample.uuid
+                                                        let deviceIdentity = result.sourceRevision.source.name
+                                                        let deviceProductName = heartRateSample.device?.name
+                                                        let deviceProductType = result.sourceRevision.productType
+                                                        let deviceOSVersion = result.sourceRevision.version
+                                                        
+                                                        let startDate = heartRateSample.startDate
+                                                        let endDate = heartRateSample.endDate
+                                                        let sourceRevision = heartRateSample.sourceRevision
+                                                        let eventID = heartRateSample.uuid
+                                                        //let sampleContext = result.metadata
+                                                        
+                                                        var y:[String:Any] =  [:]
+                                                        y["heartRate"] =  heartRateBPM
+                                                        y["heartRateUnit"] =  heartRateBPMUnit
+                                                        y["deviceIdentity"] =  deviceIdentity
+                                                        y["deviceProductName"] =  deviceProductName
+                                                        y["deviceProductType"] =  deviceProductType
+                                                        y["deviceOSVersion"] =  deviceOSVersion
+                                                        y["startDate"] =  startDate
+                                                        y["endDate"] =  endDate
+                                                        y["eventID"] =  eventID.uuidString
+                                                        y["sourceID"] = sourceRevision.source.bundleIdentifier
+                                                        
+                                                        
+                                                        y["dataTransferDate"] = self.utc_date_formatter.string(from: Date())
+                                                        
+                                                        var hrSampleMotionContext = "notSet"
+                                                        if let sampleContext = heartRateSample.metadata?[HKMetadataKeyHeartRateMotionContext] as? NSNumber {
+                                                            switch sampleContext {
+                                                            case 0:
+                                                                hrSampleMotionContext = "notSet" //A value indicating that the user’s activity level could not be determined.
+                                                            case 1:
+                                                                hrSampleMotionContext = "sedentary" //A value indicating that the user has been still for at least 5 minutes prior to the heart rate sample.
+                                                            case 2:
+                                                                hrSampleMotionContext = "active" //A value indicating that the user was in motion during the heart rate sample.
+                                                            default:
+                                                                hrSampleMotionContext = "notSet"
+                                                            }
+                                                        }
+                                                        y["sampleContext"] = hrSampleMotionContext
+                                                        y["recordingType"] = "addition"
+                                                        y["UIDeviceIdentifierForVendor"] = self.UIDeviceIdentifierForVendor
+                                                        
+                                                        print("dataDictionary y:\n \(y) \n \n")
+                                                        
+                                                        //self.sendDictionaryDataToFirebase(x: y, collectionName: "heart_rates")
+
+                                                        let handle = Auth.auth().addStateDidChangeListener { (auth, user) in
+                                                            if let user = user {
+                                                                print("theUser \(user)")
+                                                                let uid = user.uid
+                                                                let email = user.email
+                                                                //let photoURL = user.photoURL
+                                                                y["userID"] = uid
+                                                                y["userEmail"] = email
+                                                                y["author_id"] = uid
+                                                                
+                                                                var ref: DocumentReference? = nil
+                                                                ref = self.db.collection("heart_rates").addDocument(data: y) { err in
+                                                                    if let err = err {
+                                                                        print("Error adding document: \(err)")
+                                                                    } else {
+                                                                        print("heartRateSample Document added with ID: \(ref!.documentID)")
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        
+                                                    }
+                                                    //NEW HEART SAMPLES END
+                                                    
+                                                }
+                                                //global ends here
+                                                
+                                                for deletedheartRateSample in deletedObjects {
+                                                    print("deleted: \(deletedheartRateSample)")
+                                                }
+                                                
+                                                print("Heart Rate Anchor: \(anchor)")
+            }
+            
+            query.updateHandler = { (query, samplesOrNil, deletedObjectsOrNil, newAnchor, errorOrNil) in
+                
+                guard let samples = samplesOrNil, let deletedObjects = deletedObjectsOrNil else {
+                    // Handle the error here.
+                    fatalError("*** An error occurred during an update: \(errorOrNil!.localizedDescription) ***")
+                }
+                
+                anchor = newAnchor!
+                
+                do {
+                    let data = try NSKeyedArchiver.archivedData(withRootObject: newAnchor as Any, requiringSecureCoding: true)
+                    UserDefaults.standard.set(data, forKey: "HeartAnchor")
+                    print(data.first as Any)
+                } catch {
+                    print("Unable to store new heart anchor")
+                }
+                
+                //Dispatch STARTS
+                DispatchQueue.global(qos: .background).async {
+                    
+                //heart Update Handler starts
+                for heartRateSample in samples {
+                    print("Samples HR: endDate \(heartRateSample.endDate) startDate: \(heartRateSample.startDate) uuid: \(heartRateSample.uuid) meta: \n \(String(describing: heartRateSample.value(forKey: "metadata"))) \n sampleType: \(heartRateSample.sampleType) sourceRevision: \(heartRateSample.sourceRevision) device: \(String(describing: heartRateSample.device))")
+                    //NEW HEART SAMPLES START
+                    for heartRateSample in samples {
+                        print("Samples: Endate Date \(heartRateSample.endDate) startDate: \(heartRateSample.startDate) \(heartRateSample.uuid) \(String(describing: heartRateSample.value(forKey: "metadata")))")
+                        
+                        let result = heartRateSample as! HKQuantitySample
+                        
+                        let heartRateBPM = result.quantity.doubleValue(for: HKUnit(from: "count/min"))
+                        let heartRateBPMUnit = "count/min"
+                        
+                        //                let deviceUUID = heartRateSample.uuid
+                        let deviceIdentity = result.sourceRevision.source.name
+                        let deviceProductName = heartRateSample.device?.name
+                        let deviceProductType = result.sourceRevision.productType
+                        let deviceOSVersion = result.sourceRevision.version
+                        
+                        let startDate = heartRateSample.startDate
+                        let endDate = heartRateSample.endDate
+                        let sourceRevision = heartRateSample.sourceRevision
+                        let eventID = heartRateSample.uuid
+                        let sampleContext = result.metadata
+                        
+                        var y:[String:Any] =  [:]
+                        y["heartRate"] =  heartRateBPM
+                        y["heartRateUnit"] =  heartRateBPMUnit
+                        y["deviceIdentity"] =  deviceIdentity
+                        y["deviceProductName"] =  deviceProductName
+                        y["deviceProductType"] =  deviceProductType
+                        y["deviceOSVersion"] =  deviceOSVersion
+                        y["startDate"] =  startDate
+                        y["endDate"] =  endDate
+                        y["eventID"] =  eventID.uuidString
+                        y["sourceID"] = sourceRevision.source.bundleIdentifier
+                        y["dataTransferDate"] = self.utc_date_formatter.string(from: Date())
+                        
+                        var hrSampleMotionContext = "notSet"
+                        if let sampleContext = heartRateSample.metadata?[HKMetadataKeyHeartRateMotionContext] as? NSNumber {
+                            switch sampleContext {
+                            case 0:
+                                hrSampleMotionContext = "notSet" //A value indicating that the user’s activity level could not be determined.
+                            case 1:
+                                hrSampleMotionContext = "sedentary" //A value indicating that the user has been still for at least 5 minutes prior to the heart rate sample.
+                            case 2:
+                                hrSampleMotionContext = "active" //A value indicating that the user was in motion during the heart rate sample.
+                            default:
+                                hrSampleMotionContext = "notSet"
+                            }
+                        }
+                        y["sampleContext"] = hrSampleMotionContext
+                        
+                        y["recordingType"] = "update"
+                        y["UIDeviceIdentifierForVendor"] = self.UIDeviceIdentifierForVendor
+                        
+                        print("dataDictionary y:\n \(y) \n \n")
+                        
+                        //self.sendDictionaryDataToFirebase(x: y, collectionName: "heart_rates")
+                        
+                        let handle = Auth.auth().addStateDidChangeListener { (auth, user) in
+                            if let user = user {
+                                print("theUser \(user)")
+                                let uid = user.uid
+                                let email = user.email
+                                //let photoURL = user.photoURL
+                                y["userID"] = uid
+                                y["userEmail"] = email
+                                y["author_id"] = uid
+                                
+                                var ref: DocumentReference? = nil
+                                ref = self.db.collection("heart_rates").addDocument(data: y) { err in
+                                    if let err = err {
+                                        print("Error adding document: \(err)")
+                                    } else {
+                                        print("heartRateSample Document updaate with ID: \(ref!.documentID)")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    //NEW HEART SAMPLES END
+                    } //global ends
+                    
+                }
+                
+                
+                
+                for deletedheartRateSample in deletedObjects {
+                    print("deleted: \(deletedheartRateSample)")
+                }
+            }
+            
+            healthStore.execute(query)
+        }
+     
+        
+        func performAnchoredQueryForHeartRateVariability() {
+            guard let heartRateVariabilityType = HKObjectType.quantityType(forIdentifier: .heartRateVariabilitySDNN) else {
+                fatalError("*** Unable to get the heart rate type ***")
+            }
+            
+            var anchor = HKQueryAnchor.init(fromValue: 0)
+            
+            if UserDefaults.standard.object(forKey: "HeartVariabilityAnchor") != nil {
+                let data = UserDefaults.standard.object(forKey: "HeartVariabilityAnchor") as! Data
+                do {
+                    anchor = try NSKeyedUnarchiver.unarchivedObject(ofClass: HKQueryAnchor.self, from: data)!
+                } catch {
+                    print("Unable to store new anchor")
+                }
+                
+                
+            }
+            
+            let query = HKAnchoredObjectQuery(type: heartRateVariabilityType,
+                                              predicate: nil,
+                                              anchor: anchor,
+                                              limit: HKObjectQueryNoLimit) { (query, samplesOrNil, deletedObjectsOrNil, newAnchor, errorOrNil) in
+                                                guard let samples = samplesOrNil, let deletedObjects = deletedObjectsOrNil else {
+                                                    fatalError("*** An error occurred during the initial query: \(errorOrNil!.localizedDescription) ***")
+                                                }
+                                                
+                                                anchor = newAnchor!
+                                                do {
+                                                    let data = try NSKeyedArchiver.archivedData(withRootObject: anchor, requiringSecureCoding: true)
+                                                    UserDefaults.standard.set(data, forKey: "HeartVariabilityAnchor")
+                                                } catch {
+                                                    print("Unable to store new heart anchor")
+                                                }
+                                                
+                                                
+                                                //                                           var dataDictionary = [String: Any]()
+                                                
+                                                //Disptach for HRV START
+                                                DispatchQueue.global(qos: .background).async {
+                                                    
+                                                    //HRV STARTs
+                                                    for heartRateVariabilitySample in samples {
+                                                        print("Samples HRV: Endate Date \(heartRateVariabilitySample.endDate) endDate: \(heartRateVariabilitySample.startDate) \(heartRateVariabilitySample.uuid) \(String(describing: heartRateVariabilitySample.value(forKey: "metadata")))")
+                                                        
+                                                        let result = heartRateVariabilitySample as! HKQuantitySample
+                                                        let ms = HKUnit.secondUnit(with: .milli)
+                                                        let heartRatevariability = result.quantity.doubleValue(for: ms)
+                                                        let heartRateVariabilityUnit = "ms"
+                                                        
+                                                        let deviceUUID = heartRateVariabilitySample.uuid
+                                                        let deviceIdentity = result.sourceRevision.source.name
+                                                        let deviceProductName = heartRateVariabilitySample.device?.name
+                                                        let deviceProductType = result.sourceRevision.productType
+                                                        let deviceOSVersion = result.sourceRevision.version
+                                                        
+                                                        let startDate = heartRateVariabilitySample.startDate
+                                                        let endDate = heartRateVariabilitySample.endDate
+                                                        let sourceRevision = heartRateVariabilitySample.sourceRevision
+                                                        let eventID = heartRateVariabilitySample.uuid
+                                                        
+                                                        var x:[String:Any] =  [:]
+                                                        x["heartRateVariability"] =  heartRatevariability
+                                                        x["heartRateVariabilityUnit"] =  heartRateVariabilityUnit
+                                                        x["deviceIdentity"] =  deviceIdentity
+                                                        x["deviceProductName"] =  deviceProductName
+                                                        x["deviceProductType"] =  deviceProductType
+                                                        x["deviceOSVersion"] =  deviceOSVersion
+                                                        x["startDate"] =  startDate
+                                                        x["endDate"] =  endDate
+                                                        x["eventID"] =  eventID.uuidString
+                                                        x["sourceID"] = sourceRevision.source.bundleIdentifier
+                                                        x["deviceUUID"] = deviceUUID.uuidString
+                                                        x["recordingType"] = "addition"
+                                                        x["dataTransferDate"] = self.utc_date_formatter.string(from: Date())
+                                                        
+                                                        x["sampleContext"] = "NA"
+                                                        x["UIDeviceIdentifierForVendor"] = self.UIDeviceIdentifierForVendor
+                                                        
+                                                        print("dataDictionary X:\n \(x) \n \n")
+                                                        //self.sendDictionaryDataToFirebase(x: x, collectionName: "hrv_values")
+                                                        
+                                                         let handle = Auth.auth().addStateDidChangeListener { (auth, user) in
+                                                            if let user = user {
+                                                                print("theUser \(user)")
+                                                                let uid = user.uid
+                                                                let email = user.email
+                                                                //let photoURL = user.photoURL
+                                                                
+                                                                x["userID"] = uid
+                                                                x["userEmail"] = email
+                                                                x["author_id"] = uid
+                                                                
+                                                                var ref: DocumentReference? = nil
+                                                                ref = self.db.collection("hrv_values").addDocument(data: x) { err in
+                                                                    if let err = err {
+                                                                        print("Error adding document: \(err)")
+                                                                    } else {
+                                                                        print("heartRateVariabilitySample Document added with ID: \(ref!.documentID)")
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        
+                                                    }
+                                                    
+                                                    //HRV ENDs
+                                                    
+                                                }
+                                                //end DISPATCH for HRN
+                                                
+                                                for deletedheartRateVariabilitySample in deletedObjects {
+                                                    print("deleted: \(deletedheartRateVariabilitySample)")
+                                                }
+                                                
+                                                print("Heart Rate Variability Anchor: \(anchor)")
+            }
+            
+            query.updateHandler = { (query, samplesOrNil, deletedObjectsOrNil, newAnchor, errorOrNil) in
+                
+                guard let samples = samplesOrNil, let deletedObjects = deletedObjectsOrNil else {
+                    // Handle the error here.
+                    fatalError("*** An error occurred during an update: \(errorOrNil!.localizedDescription) ***")
+                }
+                
+                anchor = newAnchor!
+                
+                do {
+                    let data = try NSKeyedArchiver.archivedData(withRootObject: newAnchor as Any, requiringSecureCoding: true)
+                    UserDefaults.standard.set(data, forKey: "HeartVariabilityAnchor")
+                    print(data.first as Any)
+                } catch {
+                    print("Unable to store new heart anchor")
+                }
+                
+                for heartRateVariabilitySample in samples {
+                    print("Samples HRV: endDate \(heartRateVariabilitySample.endDate) startDate: \(heartRateVariabilitySample.startDate) uuid: \(heartRateVariabilitySample.uuid) meta: \n \(String(describing: heartRateVariabilitySample.value(forKey: "metadata"))) \n sampleType: \(heartRateVariabilitySample.sampleType) sourceRevision: \(heartRateVariabilitySample.sourceRevision) device: \(String(describing: heartRateVariabilitySample.device))")
+                    
+                    
+                    //Dispatch STARTS
+                    DispatchQueue.global(qos: .background).async {
+                        
+                        
+                    //HRV Update STARTs
+                    for heartRateVariabilitySample in samples {
+                        print("Samples HRV: Endate Date \(heartRateVariabilitySample.endDate) endDate: \(heartRateVariabilitySample.startDate) \(heartRateVariabilitySample.uuid) \(String(describing: heartRateVariabilitySample.value(forKey: "metadata")))")
+                        
+                        let result = heartRateVariabilitySample as! HKQuantitySample
+                        let ms = HKUnit.secondUnit(with: .milli)
+                        let heartRatevariability = result.quantity.doubleValue(for: ms)
+                        let heartRateVariabilityUnit = "ms"
+                        
+                        let deviceUUID = heartRateVariabilitySample.uuid
+                        let deviceIdentity = result.sourceRevision.source.name
+                        let deviceProductName = heartRateVariabilitySample.device?.name
+                        let deviceProductType = result.sourceRevision.productType
+                        let deviceOSVersion = result.sourceRevision.version
+                        
+                        let startDate = heartRateVariabilitySample.startDate
+                        let endDate = heartRateVariabilitySample.endDate
+                        let sourceRevision = heartRateVariabilitySample.sourceRevision
+                        let eventID = heartRateVariabilitySample.uuid
+                        
+                        var x:[String:Any] =  [:]
+                        x["heartRateVariability"] =  heartRatevariability
+                        x["heartRateVariabilityUnit"] =  heartRateVariabilityUnit
+                        x["deviceIdentity"] =  deviceIdentity
+                        x["deviceProductName"] =  deviceProductName
+                        x["deviceProductType"] =  deviceProductType
+                        x["deviceOSVersion"] =  deviceOSVersion
+                        x["startDate"] =  startDate
+                        x["endDate"] =  endDate
+                        x["eventID"] =  eventID.uuidString
+                        x["sourceID"] = sourceRevision.source.bundleIdentifier
+                        x["deviceUUID"] = deviceUUID.uuidString
+                        x["recordingType"] = "update"
+                        let sampleContext = result.metadata  as Any
+                        x["sampleContext"] = String(describing: sampleContext)
+                        x["dataTransferDate"] = self.utc_date_formatter.string(from: Date())
+                        x["UIDeviceIdentifierForVendor"] = self.UIDeviceIdentifierForVendor
+                        
+                        print("dataDictionary X:\n \(x) \n \n")
+                       // self.sendDictionaryDataToFirebase(x: x, collectionName: "hrv_values")
+                        
+                      let handle = Auth.auth().addStateDidChangeListener { (auth, user) in
+                            if let user = user {
+                                print("theUser \(user)")
+                                let uid = user.uid
+                                let email = user.email
+                                //let photoURL = user.photoURL
+                                
+                                x["userID"] = uid
+                                x["userEmail"] = email
+                                x["author_id"] = uid
+                                
+                                var ref: DocumentReference? = nil
+                                ref = self.db.collection("hrv_values").addDocument(data: x) { err in
+                                    if let err = err {
+                                        
+                                        print("Error adding document: \(err)")
+                                    } else {
+                                        print("heartRateVariabilitySample Document updated with ID: \(ref!.documentID)")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    //HRV Update ENDs
+                        
+                    }// global ends
+                }
+                
+                for deletedheartRateVariabilitySample in deletedObjects {
+                    print("deleted: \(deletedheartRateVariabilitySample)")
+                }
+            }
+            
+            healthStore.execute(query)
+        }
+        
     
+     
+     //START -- RESTING HEAR RATE
+     func performAnchoredQueryForRestingHeartRate() {
+         
+         guard let restingHeartRateType = HKObjectType.quantityType(forIdentifier: .restingHeartRate) else {
+             fatalError("*** Unable to get the resting heart rate type ***")
+         }
+         
+         
+         var anchor = HKQueryAnchor.init(fromValue: 0)
+         
+         if UserDefaults.standard.object(forKey: "RestingHeartAnchor") != nil {
+             let data = UserDefaults.standard.object(forKey: "RestingHeartAnchor") as! Data
+             do {
+                 anchor = try NSKeyedUnarchiver.unarchivedObject(ofClass: HKQueryAnchor.self, from: data)!
+             } catch {
+                 print("Unable to store new resting heart rate anchor")
+             }
+             
+         }
+         
+         let query = HKAnchoredObjectQuery(type: restingHeartRateType,
+                                           predicate: nil,
+                                           anchor: anchor,
+                                           limit: HKObjectQueryNoLimit) { (query, samplesOrNil, deletedObjectsOrNil, newAnchor, errorOrNil) in
+                                             guard let samples = samplesOrNil, let deletedObjects = deletedObjectsOrNil else {
+                                                 fatalError("*** An error occurred during the initial query: \(errorOrNil!.localizedDescription) ***")
+                                             }
+                                             
+                                             anchor = newAnchor!
+                                             do {
+                                                 let data = try NSKeyedArchiver.archivedData(withRootObject: anchor, requiringSecureCoding: true)
+                                                 UserDefaults.standard.set(data, forKey: "RestingHeartAnchor")
+                                             } catch {
+                                                 print("Unable to store new resting heart anchor")
+                                             }
+                                             
+                                             
+                                             //                                           var dataDictionary = [String: Any]()
+                                             
+                                             
+                                             //Dispatch STARTS
+                                             DispatchQueue.global(qos: .background).async {
+                                                 
+                                                 //NEW Resting HEART SAMPLES START
+                                                 for heartRateSample in samples {
+                                                     
+                                                     print("Samples resting heart rate: Endate Date \(heartRateSample.endDate) startDate: \(heartRateSample.startDate) \(heartRateSample.uuid) \(String(describing: heartRateSample.value(forKey: "metadata")))")
+                                                     
+                                                     let result = heartRateSample as! HKQuantitySample
+                                                     
+                                                     let heartRateBPM = result.quantity.doubleValue(for: HKUnit(from: "count/min"))
+                                                     let heartRateBPMUnit = "count/min"
+                                                     
+                                                     //                let deviceUUID = heartRateSample.uuid
+                                                     let deviceIdentity = result.sourceRevision.source.name
+                                                     let deviceProductName = heartRateSample.device?.name
+                                                     let deviceProductType = result.sourceRevision.productType
+                                                     let deviceOSVersion = result.sourceRevision.version
+                                                     
+                                                     let startDate = heartRateSample.startDate
+                                                     let endDate = heartRateSample.endDate
+                                                     let sourceRevision = heartRateSample.sourceRevision
+                                                     let eventID = heartRateSample.uuid
+                                                     //let sampleContext = result.metadata
+                                                     
+                                                     var y:[String:Any] =  [:]
+                                                     y["heartRate"] =  heartRateBPM
+                                                     y["heartRateUnit"] =  heartRateBPMUnit
+                                                     y["deviceIdentity"] =  deviceIdentity
+                                                     y["deviceProductName"] =  deviceProductName
+                                                     y["deviceProductType"] =  deviceProductType
+                                                     y["deviceOSVersion"] =  deviceOSVersion
+                                                     y["startDate"] =  startDate
+                                                     y["endDate"] =  endDate
+                                                     y["eventID"] =  eventID.uuidString
+                                                     y["sourceID"] = sourceRevision.source.bundleIdentifier
+                                                     
+                                                     
+                                                     y["dataTransferDate"] = self.utc_date_formatter.string(from: Date())
+                                                     
+                                                     var hrSampleMotionContext = "notSet"
+                                                     if let sampleContext = heartRateSample.metadata?[HKMetadataKeyHeartRateMotionContext] as? NSNumber {
+                                                         switch sampleContext {
+                                                         case 0:
+                                                             hrSampleMotionContext = "notSet" //A value indicating that the user’s activity level could not be determined.
+                                                         case 1:
+                                                             hrSampleMotionContext = "sedentary" //A value indicating that the user has been still for at least 5 minutes prior to the heart rate sample.
+                                                         case 2:
+                                                             hrSampleMotionContext = "active" //A value indicating that the user was in motion during the heart rate sample.
+                                                         default:
+                                                             hrSampleMotionContext = "notSet"
+                                                         }
+                                                     }
+                                                     y["sampleContext"] = hrSampleMotionContext
+                                                     y["recordingType"] = "addition"
+                                                     y["objectType"] = "resting heart rate"
+                                                     y["UIDeviceIdentifierForVendor"] = self.UIDeviceIdentifierForVendor
+                                                     
+                                                     print("dataDictionary y:\n \(y) \n \n")
+                                                     
+                                                     //self.sendDictionaryDataToFirebase(x: y, collectionName: "init_heart_rates")
+
+                                                     let handle = Auth.auth().addStateDidChangeListener { (auth, user) in
+                                                         if let user = user {
+                                                             print("theUser \(user)")
+                                                             let uid = user.uid
+                                                             let email = user.email
+                                                             //let photoURL = user.photoURL
+                                                             y["userID"] = uid
+                                                             y["userEmail"] = email
+                                                             y["author_id"] = uid
+                                                             
+                                                             var ref: DocumentReference? = nil
+                                                             ref = self.db.collection("resting_heart_rates").addDocument(data: y) { err in
+                                                                 if let err = err {
+                                                                     print("Error adding document: \(err)")
+                                                                 } else {
+                                                                     print("Resting heartRateSample Document added with ID: \(ref!.documentID)")
+                                                                 }
+                                                             }
+                                                         }
+                                                     }
+                                                     
+                                                 }
+                                                 //NEW HEART SAMPLES END
+                                                 
+                                             }
+                                             //global ends here
+                                             
+                                             for deletedheartRateSample in deletedObjects {
+                                                 print("deleted: \(deletedheartRateSample)")
+                                             }
+                                             
+                                             print("Resting Heart Rate Anchor: \(anchor)")
+         }
+         
+         query.updateHandler = { (query, samplesOrNil, deletedObjectsOrNil, newAnchor, errorOrNil) in
+             
+             guard let samples = samplesOrNil, let deletedObjects = deletedObjectsOrNil else {
+                 // Handle the error here.
+                 fatalError("*** An error occurred during an update: \(errorOrNil!.localizedDescription) ***")
+             }
+             
+             anchor = newAnchor!
+             
+             do {
+                 let data = try NSKeyedArchiver.archivedData(withRootObject: newAnchor as Any, requiringSecureCoding: true)
+                 UserDefaults.standard.set(data, forKey: "RestingHeartAnchor")
+                 print(data.first as Any)
+             } catch {
+                 print("Unable to store new Resting Heart Anchor")
+             }
+             
+             //Dispatch STARTS
+             DispatchQueue.global(qos: .background).async {
+                 
+             //heart Update Handler starts
+             for heartRateSample in samples {
+                 print("Samples HR: endDate \(heartRateSample.endDate) startDate: \(heartRateSample.startDate) uuid: \(heartRateSample.uuid) meta: \n \(String(describing: heartRateSample.value(forKey: "metadata"))) \n sampleType: \(heartRateSample.sampleType) sourceRevision: \(heartRateSample.sourceRevision) device: \(String(describing: heartRateSample.device))")
+                 //NEW HEART SAMPLES START
+                 for heartRateSample in samples {
+                     print("Samples: Endate Date \(heartRateSample.endDate) startDate: \(heartRateSample.startDate) \(heartRateSample.uuid) \(String(describing: heartRateSample.value(forKey: "metadata")))")
+                     
+                     let result = heartRateSample as! HKQuantitySample
+                     
+                     let heartRateBPM = result.quantity.doubleValue(for: HKUnit(from: "count/min"))
+                     let heartRateBPMUnit = "count/min"
+                     
+                     //                let deviceUUID = heartRateSample.uuid
+                     let deviceIdentity = result.sourceRevision.source.name
+                     let deviceProductName = heartRateSample.device?.name
+                     let deviceProductType = result.sourceRevision.productType
+                     let deviceOSVersion = result.sourceRevision.version
+                     
+                     let startDate = heartRateSample.startDate
+                     let endDate = heartRateSample.endDate
+                     let sourceRevision = heartRateSample.sourceRevision
+                     let eventID = heartRateSample.uuid
+                     let sampleContext = result.metadata
+                     
+                     var y:[String:Any] =  [:]
+                     y["restingHeartRate"] =  heartRateBPM
+                     y["heartRateUnit"] =  heartRateBPMUnit
+                     y["deviceIdentity"] =  deviceIdentity
+                     y["deviceProductName"] =  deviceProductName
+                     y["deviceProductType"] =  deviceProductType
+                     y["deviceOSVersion"] =  deviceOSVersion
+                     y["startDate"] =  startDate
+                     y["endDate"] =  endDate
+                     y["eventID"] =  eventID.uuidString
+                     y["sourceID"] = sourceRevision.source.bundleIdentifier
+                     y["dataTransferDate"] = self.utc_date_formatter.string(from: Date())
+                     
+                     var hrSampleMotionContext = "notSet"
+                     if let sampleContext = heartRateSample.metadata?[HKMetadataKeyHeartRateMotionContext] as? NSNumber {
+                         switch sampleContext {
+                         case 0:
+                             hrSampleMotionContext = "notSet" //A value indicating that the user’s activity level could not be determined.
+                         case 1:
+                             hrSampleMotionContext = "sedentary" //A value indicating that the user has been still for at least 5 minutes prior to the heart rate sample.
+                         case 2:
+                             hrSampleMotionContext = "active" //A value indicating that the user was in motion during the heart rate sample.
+                         default:
+                             hrSampleMotionContext = "notSet"
+                         }
+                     }
+                     y["sampleContext"] = hrSampleMotionContext
+                     
+                     y["recordingType"] = "update"
+                     y["objectType"] = "resting heart rate"
+                     y["UIDeviceIdentifierForVendor"] = self.UIDeviceIdentifierForVendor
+                     
+                     print("dataDictionary y:\n \(y) \n \n")
+                     
+                     //self.sendDictionaryDataToFirebase(x: y, collectionName: "heart_rates")
+                     
+                     let handle = Auth.auth().addStateDidChangeListener { (auth, user) in
+                         if let user = user {
+                             print("theUser \(user)")
+                             let uid = user.uid
+                             let email = user.email
+                             //let photoURL = user.photoURL
+                             y["userID"] = uid
+                             y["userEmail"] = email
+                             y["author_id"] = uid
+                             
+                             var ref: DocumentReference? = nil
+                             ref = self.db.collection("resting_heart_rates").addDocument(data: y) { err in
+                                 if let err = err {
+                                     print("Error adding document: \(err)")
+                                 } else {
+                                     print("heartRateSample Document updaate with ID: \(ref!.documentID)")
+                                 }
+                             }
+                         }
+                     }
+                 }
+                 //NEW HEART SAMPLES END
+                 } //global ends
+                 
+             }
+             
+             
+             
+             for deletedheartRateSample in deletedObjects {
+                 print("deleted: \(deletedheartRateSample)")
+             }
+         }
+         
+         healthStore.execute(query)
+     }
+     //END -- RESTING HEART RATE
+     
+     
+     
+     
+     //START -- Average Walking HEART RATE
+     func performAnchoredQueryForAverageWalkingHeartRate() {
+         
+         guard let averageWalkingHeartRateType = HKObjectType.quantityType(forIdentifier: .walkingHeartRateAverage) else {
+             fatalError("*** Unable to get the average walking heart rate type ***")
+         }
+         
+         
+         var anchor = HKQueryAnchor.init(fromValue: 0)
+         
+         if UserDefaults.standard.object(forKey: "AverageWalkingHeartAnchor") != nil {
+             let data = UserDefaults.standard.object(forKey: "AverageWalkingHeartAnchor") as! Data
+             do {
+                 anchor = try NSKeyedUnarchiver.unarchivedObject(ofClass: HKQueryAnchor.self, from: data)!
+             } catch {
+                 print("Unable to store new average walking heart rate anchor")
+             }
+             
+         }
+         
+         let query = HKAnchoredObjectQuery(type: averageWalkingHeartRateType,
+                                           predicate: nil,
+                                           anchor: anchor,
+                                           limit: HKObjectQueryNoLimit) { (query, samplesOrNil, deletedObjectsOrNil, newAnchor, errorOrNil) in
+                                             guard let samples = samplesOrNil, let deletedObjects = deletedObjectsOrNil else {
+                                                 fatalError("*** An error occurred during the initial query: \(errorOrNil!.localizedDescription) ***")
+                                             }
+                                             
+                                             anchor = newAnchor!
+                                             do {
+                                                 let data = try NSKeyedArchiver.archivedData(withRootObject: anchor, requiringSecureCoding: true)
+                                                 UserDefaults.standard.set(data, forKey: "AverageWalkingHeartAnchor")
+                                             } catch {
+                                                 print("Unable to store new average walking heart anchor")
+                                             }
+                                             
+                                             
+                                             //                                           var dataDictionary = [String: Any]()
+                                             
+                                             
+                                             //Dispatch STARTS
+                                             DispatchQueue.global(qos: .background).async {
+                                                 
+                                                 //NEW Resting HEART SAMPLES START
+                                                 for heartRateSample in samples {
+                                                     
+                                                     print("Samples resting heart rate: Endate Date \(heartRateSample.endDate) startDate: \(heartRateSample.startDate) \(heartRateSample.uuid) \(String(describing: heartRateSample.value(forKey: "metadata")))")
+                                                     
+                                                     let result = heartRateSample as! HKQuantitySample
+                                                     
+                                                     let heartRateBPM = result.quantity.doubleValue(for: HKUnit(from: "count/min"))
+                                                     let heartRateBPMUnit = "count/min"
+                                                     
+                                                     //                let deviceUUID = heartRateSample.uuid
+                                                     let deviceIdentity = result.sourceRevision.source.name
+                                                     let deviceProductName = heartRateSample.device?.name
+                                                     let deviceProductType = result.sourceRevision.productType
+                                                     let deviceOSVersion = result.sourceRevision.version
+                                                     
+                                                     let startDate = heartRateSample.startDate
+                                                     let endDate = heartRateSample.endDate
+                                                     let sourceRevision = heartRateSample.sourceRevision
+                                                     let eventID = heartRateSample.uuid
+                                                     //let sampleContext = result.metadata
+                                                     
+                                                     var y:[String:Any] =  [:]
+                                                     y["heartRate"] =  heartRateBPM
+                                                     y["heartRateUnit"] =  heartRateBPMUnit
+                                                     y["deviceIdentity"] =  deviceIdentity
+                                                     y["deviceProductName"] =  deviceProductName
+                                                     y["deviceProductType"] =  deviceProductType
+                                                     y["deviceOSVersion"] =  deviceOSVersion
+                                                     y["startDate"] =  startDate
+                                                     y["endDate"] =  endDate
+                                                     y["eventID"] =  eventID.uuidString
+                                                     y["sourceID"] = sourceRevision.source.bundleIdentifier
+                                                     
+                                                     
+                                                     y["dataTransferDate"] = self.utc_date_formatter.string(from: Date())
+                                                     
+                                                     var hrSampleMotionContext = "notSet"
+                                                     if let sampleContext = heartRateSample.metadata?[HKMetadataKeyHeartRateMotionContext] as? NSNumber {
+                                                         switch sampleContext {
+                                                         case 0:
+                                                             hrSampleMotionContext = "notSet" //A value indicating that the user’s activity level could not be determined.
+                                                         case 1:
+                                                             hrSampleMotionContext = "sedentary" //A value indicating that the user has been still for at least 5 minutes prior to the heart rate sample.
+                                                         case 2:
+                                                             hrSampleMotionContext = "active" //A value indicating that the user was in motion during the heart rate sample.
+                                                         default:
+                                                             hrSampleMotionContext = "notSet"
+                                                         }
+                                                     }
+                                                     y["sampleContext"] = hrSampleMotionContext
+                                                     y["recordingType"] = "addition"
+                                                     y["objectType"] = "average walking heart rate"
+                                                     y["UIDeviceIdentifierForVendor"] = self.UIDeviceIdentifierForVendor
+                                                     
+                                                     print("dataDictionary y:\n \(y) \n \n")
+                                                     
+                                                     //self.sendDictionaryDataToFirebase(x: y, collectionName: "init_heart_rates")
+
+                                                     let handle = Auth.auth().addStateDidChangeListener { (auth, user) in
+                                                         if let user = user {
+                                                             print("theUser \(user)")
+                                                             let uid = user.uid
+                                                             let email = user.email
+                                                             //let photoURL = user.photoURL
+                                                             y["userID"] = uid
+                                                             y["userEmail"] = email
+                                                             y["author_id"] = uid
+                                                             
+                                                             var ref: DocumentReference? = nil
+                                                             ref = self.db.collection("resting_heart_rates").addDocument(data: y) { err in
+                                                                 if let err = err {
+                                                                     print("Error adding document: \(err)")
+                                                                 } else {
+                                                                     print("Resting heartRateSample Document added with ID: \(ref!.documentID)")
+                                                                 }
+                                                             }
+                                                         }
+                                                     }
+                                                     
+                                                 }
+                                                 //NEW HEART SAMPLES END
+                                                 
+                                             }
+                                             //global ends here
+                                             
+                                             for deletedheartRateSample in deletedObjects {
+                                                 print("deleted: \(deletedheartRateSample)")
+                                             }
+                                             
+                                             print("Resting Heart Rate Anchor: \(anchor)")
+         }
+         
+         query.updateHandler = { (query, samplesOrNil, deletedObjectsOrNil, newAnchor, errorOrNil) in
+             
+             guard let samples = samplesOrNil, let deletedObjects = deletedObjectsOrNil else {
+                 // Handle the error here.
+                 fatalError("*** An error occurred during an update: \(errorOrNil!.localizedDescription) ***")
+             }
+             
+             anchor = newAnchor!
+             
+             do {
+                 let data = try NSKeyedArchiver.archivedData(withRootObject: newAnchor as Any, requiringSecureCoding: true)
+                 UserDefaults.standard.set(data, forKey: "AverageWalkingHeartAnchor")
+                 print(data.first as Any)
+             } catch {
+                 print("Unable to store new average walking Heart Anchor")
+             }
+             
+             //Dispatch STARTS
+             DispatchQueue.global(qos: .background).async {
+                 
+             //heart Update Handler starts
+             for heartRateSample in samples {
+                 print("Samples HR: endDate \(heartRateSample.endDate) startDate: \(heartRateSample.startDate) uuid: \(heartRateSample.uuid) meta: \n \(String(describing: heartRateSample.value(forKey: "metadata"))) \n sampleType: \(heartRateSample.sampleType) sourceRevision: \(heartRateSample.sourceRevision) device: \(String(describing: heartRateSample.device))")
+                 //NEW HEART SAMPLES START
+                 for heartRateSample in samples {
+                     print("Samples: Endate Date \(heartRateSample.endDate) startDate: \(heartRateSample.startDate) \(heartRateSample.uuid) \(String(describing: heartRateSample.value(forKey: "metadata")))")
+                     
+                     let result = heartRateSample as! HKQuantitySample
+                     
+                     let heartRateBPM = result.quantity.doubleValue(for: HKUnit(from: "count/min"))
+                     let heartRateBPMUnit = "count/min"
+                     
+                     //                let deviceUUID = heartRateSample.uuid
+                     let deviceIdentity = result.sourceRevision.source.name
+                     let deviceProductName = heartRateSample.device?.name
+                     let deviceProductType = result.sourceRevision.productType
+                     let deviceOSVersion = result.sourceRevision.version
+                     
+                     let startDate = heartRateSample.startDate
+                     let endDate = heartRateSample.endDate
+                     let sourceRevision = heartRateSample.sourceRevision
+                     let eventID = heartRateSample.uuid
+                     //let sampleContext = result.metadata
+                     
+                     var y:[String:Any] =  [:]
+                     y["averageWalkingHeartRate"] =  heartRateBPM
+                     y["heartRateUnit"] =  heartRateBPMUnit
+                     y["deviceIdentity"] =  deviceIdentity
+                     y["deviceProductName"] =  deviceProductName
+                     y["deviceProductType"] =  deviceProductType
+                     y["deviceOSVersion"] =  deviceOSVersion
+                     y["startDate"] =  startDate
+                     y["endDate"] =  endDate
+                     y["eventID"] =  eventID.uuidString
+                     y["sourceID"] = sourceRevision.source.bundleIdentifier
+                     y["dataTransferDate"] = self.utc_date_formatter.string(from: Date())
+                     
+                     var hrSampleMotionContext = "notSet"
+                     if let sampleContext = heartRateSample.metadata?[HKMetadataKeyHeartRateMotionContext] as? NSNumber {
+                         switch sampleContext {
+                         case 0:
+                             hrSampleMotionContext = "notSet" //A value indicating that the user’s activity level could not be determined.
+                         case 1:
+                             hrSampleMotionContext = "sedentary" //A value indicating that the user has been still for at least 5 minutes prior to the heart rate sample.
+                         case 2:
+                             hrSampleMotionContext = "active" //A value indicating that the user was in motion during the heart rate sample.
+                         default:
+                             hrSampleMotionContext = "notSet"
+                         }
+                     }
+                     y["sampleContext"] = hrSampleMotionContext
+                     
+                     y["recordingType"] = "update"
+                     y["objectType"] = "average walking heart rate"
+                     y["UIDeviceIdentifierForVendor"] = self.UIDeviceIdentifierForVendor
+                     
+                     print("dataDictionary y:\n \(y) \n \n")
+                     
+                     //self.sendDictionaryDataToFirebase(x: y, collectionName: "heart_rates")
+                     
+                     let handle = Auth.auth().addStateDidChangeListener { (auth, user) in
+                         if let user = user {
+                             print("theUser \(user)")
+                             let uid = user.uid
+                             let email = user.email
+                             //let photoURL = user.photoURL
+                             y["userID"] = uid
+                             y["userEmail"] = email
+                             y["author_id"] = uid
+                             
+                             var ref: DocumentReference? = nil
+                             ref = self.db.collection("average_walking_heart_rates").addDocument(data: y) { err in
+                                 if let err = err {
+                                     print("Error adding document: \(err)")
+                                 } else {
+                                     print("average walking heartRateSample Document updaate with ID: \(ref!.documentID)")
+                                 }
+                             }
+                         }
+                     }
+                 }
+                 //NEW HEART SAMPLES END
+                 } //global ends
+                 
+             }
+             
+             
+             
+             for deletedheartRateSample in deletedObjects {
+                 print("deleted: \(deletedheartRateSample)")
+             }
+         }
+         
+         healthStore.execute(query)
+     }
+     //END -- Average Walking HEART RATE
+     
+    
+        
+        func performAnchoredQueryForOxygenSaturation() {
+                
+                guard let oxygenSaturationType = HKObjectType.quantityType(forIdentifier: .oxygenSaturation) else {
+                    fatalError("*** Unable to get the heart rate type ***")
+                }
+                
+                var anchor = HKQueryAnchor.init(fromValue: 0)
+                
+                if UserDefaults.standard.object(forKey: "OxygenAnchor") != nil {
+                    let data = UserDefaults.standard.object(forKey: "OxygenAnchor") as! Data
+                    do {
+                        anchor = try NSKeyedUnarchiver.unarchivedObject(ofClass: HKQueryAnchor.self, from: data)!
+                    } catch {
+                        print("Unable to store new anchor")
+                    }
+                    
+                    
+                }
+                
+                let query = HKAnchoredObjectQuery(type: oxygenSaturationType,
+                                                  predicate: nil,
+                                                  anchor: anchor,
+                                                  limit: HKObjectQueryNoLimit) { (query, samplesOrNil, deletedObjectsOrNil, newAnchor, errorOrNil) in
+                                                    guard let samples = samplesOrNil, let deletedObjects = deletedObjectsOrNil else {
+                                                        fatalError("*** An error occurred during the initial query: \(errorOrNil!.localizedDescription) ***")
+                                                    }
+                                                    
+                                                    anchor = newAnchor!
+                                                    do {
+                                                        let data = try NSKeyedArchiver.archivedData(withRootObject: anchor, requiringSecureCoding: true)
+                                                        UserDefaults.standard.set(data, forKey: "OxygenAnchor")
+                                                    } catch {
+                                                        print("Unable to store new oxygen anchor")
+                                                    }
+                                                    
+                                                    
+                                                    //                                           var dataDictionary = [String: Any]()
+                                                    
+                                                    
+                                                    
+                                                    //Dispatch STARTS
+                                                    DispatchQueue.global(qos: .background).async {
+                                                    
+                                                    //NEW HEART SAMPLES START
+                                                    for oxygenSaturationSample in samples {
+                                                        print("Samples: Endate Date \(oxygenSaturationSample.endDate) startDate: \(oxygenSaturationSample.startDate) \(oxygenSaturationSample.uuid) \(String(describing: oxygenSaturationSample.value(forKey: "metadata")))")
+                                                        
+                                                        let result = oxygenSaturationSample as! HKQuantitySample
+                                                        
+                                                        let oxygenSaturationPCT = result.quantity.doubleValue(for: HKUnit(from: "%"))*100
+                                                        let oxygenSaturationPCTUnit = "pct"
+                                                        
+                                                        //                let deviceUUID = oxygenSaturationSample.uuid
+                                                        let deviceIdentity = result.sourceRevision.source.name
+                                                        let deviceProductName = oxygenSaturationSample.device?.name
+                                                        let deviceProductType = result.sourceRevision.productType
+                                                        let deviceOSVersion = result.sourceRevision.version
+                                                        
+                                                        let startDate = oxygenSaturationSample.startDate
+                                                        let endDate = oxygenSaturationSample.endDate
+                                                        let sourceRevision = oxygenSaturationSample.sourceRevision
+                                                        let eventID = oxygenSaturationSample.uuid
+                                                        //let sampleContext = result.metadata
+                                                        
+                                                        var y:[String:Any] =  [:]
+                                                        y["oxygenSaturation"] =  oxygenSaturationPCT
+                                                        y["oxygenSaturationUnit"] =  oxygenSaturationPCTUnit
+                                                        y["deviceIdentity"] =  deviceIdentity
+                                                        y["deviceProductName"] =  deviceProductName
+                                                        y["deviceProductType"] =  deviceProductType
+                                                        y["deviceOSVersion"] =  deviceOSVersion
+                                                        y["startDate"] =  startDate
+                                                        y["endDate"] =  endDate
+                                                        y["eventID"] =  eventID.uuidString
+                                                        y["sourceID"] = sourceRevision.source.bundleIdentifier
+                                                        
+                                                        var hrSampleMotionContext = "notSet"
+                                                        if let sampleContext = oxygenSaturationSample.metadata?[HKMetadataKeyHeartRateMotionContext] as? NSNumber {
+                                                            switch sampleContext {
+                                                            case 0:
+                                                                hrSampleMotionContext = "notSet" //A value indicating that the user’s activity level could not be determined.
+                                                            case 1:
+                                                                hrSampleMotionContext = "sedentary" //A value indicating that the user has been still for at least 5 minutes prior to the heart rate sample.
+                                                            case 2:
+                                                                hrSampleMotionContext = "active" //A value indicating that the user was in motion during the heart rate sample.
+                                                            default:
+                                                                hrSampleMotionContext = "notSet"
+                                                            }
+                                                        }
+                                                        y["sampleContext"] = hrSampleMotionContext
+                                                        
+                                                        y["recordingType"] = "addition"
+                                                        print("dataDictionary y:\n \(y) \n \n")
+                                                        
+                                                        
+                                                        y["dataTransferDate"] = self.utc_date_formatter.string(from: Date())
+                                                        y["UIDeviceIdentifierForVendor"] = self.UIDeviceIdentifierForVendor
+                                                        
+                                                        print("dataDictionary X:\n \(y) \n \n")
+                                                      //  self.sendDictionaryDataToFirebase(x: y, collectionName: "oxygen_sats")
+                                                        
+                                                       let handle = Auth.auth().addStateDidChangeListener { (auth, user) in
+                                                            if let user = user {
+                                                                print("theUser \(user)")
+                                                                let uid = user.uid
+                                                                let email = user.email
+                                                                //let photoURL = user.photoURL
+                                                                y["userID"] = uid
+                                                                y["userEmail"] = email
+                                                                y["author_id"] = uid
+                                                                
+                                                                var ref: DocumentReference? = nil
+                                                                ref = self.db.collection("oxygen_sats").addDocument(data: y) { err in
+                                                                    if let err = err {
+                                                                        print("Error adding document: \(err)")
+                                                                    } else {
+                                                                        print("oxygenSaturationSample Document added with ID: \(ref!.documentID)")
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    //NEW HEART SAMPLES END
+                                                    } //global ends
+                                                    
+                                                    for deletedoxygenSaturationSample in deletedObjects {
+                                                        print("deleted: \(deletedoxygenSaturationSample)")
+                                                    }
+                                                    
+                                                    print("Oxygen Saturation Anchor: \(anchor)")
+                }
+                
+                query.updateHandler = { (query, samplesOrNil, deletedObjectsOrNil, newAnchor, errorOrNil) in
+                    
+                    guard let samples = samplesOrNil, let deletedObjects = deletedObjectsOrNil else {
+                        // Handle the error here.
+                        fatalError("*** An error occurred during an update: \(errorOrNil!.localizedDescription) ***")
+                    }
+                    
+                    anchor = newAnchor!
+                    
+                    do {
+                        let data = try NSKeyedArchiver.archivedData(withRootObject: newAnchor as Any, requiringSecureCoding: true)
+                        UserDefaults.standard.set(data, forKey: "OxygenAnchor")
+                        print(data.first as Any)
+                    } catch {
+                        print("Unable to store new oxygen anchor")
+                    }
+                    
+                    
+                    //Dispatch STARTS
+                    DispatchQueue.global(qos: .background).async {
+                    
+                    for oxygenSaturationSample in samples {
+                        print("Samples HR: endDate \(oxygenSaturationSample.endDate) startDate: \(oxygenSaturationSample.startDate) uuid: \(oxygenSaturationSample.uuid) meta: \n \(String(describing: oxygenSaturationSample.value(forKey: "metadata"))) \n sampleType: \(oxygenSaturationSample.sampleType) sourceRevision: \(oxygenSaturationSample.sourceRevision) device: \(String(describing: oxygenSaturationSample.device))")
+                        //NEW HEART SAMPLES START
+                        for oxygenSaturationSample in samples {
+                            print("Samples: Endate Date \(oxygenSaturationSample.endDate) startDate: \(oxygenSaturationSample.startDate) \(oxygenSaturationSample.uuid) \(String(describing: oxygenSaturationSample.value(forKey: "metadata")))")
+                            
+                            let result = oxygenSaturationSample as! HKQuantitySample
+                            
+                            let oxygenSaturationBPM = result.quantity.doubleValue(for: HKUnit(from: "%"))*100
+                            let oxygenSaturationBPMUnit = "percent"
+                            
+                            //                let deviceUUID = oxygenSaturationSample.uuid
+                            let deviceIdentity = result.sourceRevision.source.name
+                            let deviceProductName = oxygenSaturationSample.device?.name
+                            let deviceProductType = result.sourceRevision.productType
+                            let deviceOSVersion = result.sourceRevision.version
+                            
+                            let startDate = oxygenSaturationSample.startDate
+                            let endDate = oxygenSaturationSample.endDate
+                            let sourceRevision = oxygenSaturationSample.sourceRevision
+                            let eventID = oxygenSaturationSample.uuid
+        //                    let sampleContext = result.metadata
+                            
+                            var y:[String:Any] =  [:]
+                            y["oxygenSaturation"] =  oxygenSaturationBPM
+                            y["oxygenSaturationUnit"] =  oxygenSaturationBPMUnit
+                            y["deviceIdentity"] =  deviceIdentity
+                            y["deviceProductName"] =  deviceProductName
+                            y["deviceProductType"] =  deviceProductType
+                            y["deviceOSVersion"] =  deviceOSVersion
+                            y["startDate"] =  startDate
+                            y["endDate"] =  endDate
+                            y["eventID"] =  eventID.uuidString
+                            y["sourceID"] = sourceRevision.source.bundleIdentifier
+                            
+                            var hrSampleMotionContext = "notSet"
+                            if let sampleContext = oxygenSaturationSample.metadata?[HKMetadataKeyHeartRateMotionContext] as? NSNumber {
+                                switch sampleContext {
+                                case 0:
+                                    hrSampleMotionContext = "notSet" //A value indicating that the user’s activity level could not be determined.
+                                case 1:
+                                    hrSampleMotionContext = "sedentary" //A value indicating that the user has been still for at least 5 minutes prior to the heart rate sample.
+                                case 2:
+                                    hrSampleMotionContext = "active" //A value indicating that the user was in motion during the heart rate sample.
+                                default:
+                                    hrSampleMotionContext = "notSet"
+                                }
+                            }
+                            y["sampleContext"] = hrSampleMotionContext
+                            
+                            y["recordingType"] = "update"
+                            y["UIDeviceIdentifierForVendor"] = self.UIDeviceIdentifierForVendor
+                            
+                            print("dataDictionary y:\n \(y) \n \n")
+                            
+                            y["dataTransferDate"] = self.utc_date_formatter.string(from: Date())
+                            
+                            print("dataDictionary X:\n \(y) \n \n")
+                            
+                            
+                          //  self.sendDictionaryDataToFirebase(x: y, collectionName: "oxygen_sats")
+                            
+                            
+                           let handle = Auth.auth().addStateDidChangeListener { (auth, user) in
+                                if let user = user {
+                                    print("theUser \(user)")
+                                    let uid = user.uid
+                                    let email = user.email
+                                    //let photoURL = user.photoURL
+                                    y["userID"] = uid
+                                    y["userEmail"] = email
+                                    y["author_id"] = uid
+                                    
+                                    var ref: DocumentReference? = nil
+                                    ref = self.db.collection("oxygen_sats").addDocument(data: y) { err in
+                                        if let err = err {
+                                            print("Error adding document: \(err)")
+                                        } else {
+                                            print("oxygenSaturationSample Document updaate with ID: \(ref!.documentID)")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        //NEW HEART SAMPLES END
+                        
+                        }
+                        //global ends here
+                        
+                    }
+                    
+                    
+                    
+                    
+                    for deletedoxygenSaturationSample in deletedObjects {
+                        print("deleted: \(deletedoxygenSaturationSample)")
+                    }
+                }
+                
+                healthStore.execute(query)
+            }
+        
+
+        func performAnchoredQueryStepCount() {
+    //        print("hk_read_auth performAnchoredQueryStepCount")
+    //
+    //
+    //
+    //
+    //        if HKHealthStore.isHealthDataAvailable() {
+    //            let readDataTypes : Set = [HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.stepCount)!
+    //
+    //
+    //            ]
+    //
+    //            //let writeDataTypes : Set = [HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.stepCount)!]
+    //
+    //            self.healthStore.requestAuthorization(toShare: nil, read: readDataTypes) { (success, error) in
+    //                if !success {
+    //                    // Handle the error here.
+    //                    print("healthstore auth NOT granted!")
+    //                } else {
+    //                    print("healthstore auth granted!")
+    //
+    //                }
+    //            }
+    //        }
+            
+            guard let stepCountType = HKObjectType.quantityType(forIdentifier: .stepCount) else {
+                fatalError("*** Unable to get the step count type ***")
+            }
+            
+            var anchor = HKQueryAnchor.init(fromValue: 0)
+            
+            if UserDefaults.standard.object(forKey: "StepAnchor") != nil {
+                let data = UserDefaults.standard.object(forKey: "StepAnchor") as! Data
+                
+                //unarchiveObject(with: data) as! HKQueryAnchor
+                do {
+                    anchor = try NSKeyedUnarchiver.unarchivedObject(ofClass: HKQueryAnchor.self, from: data)!
+                } catch {
+                    print("Unable to store new step anchor")
+                }
+            }
+            
+            let query = HKAnchoredObjectQuery(type: stepCountType,
+                                              predicate: nil,
+                                              anchor: anchor,
+                                              limit: HKObjectQueryNoLimit) { (query, samplesOrNil, deletedObjectsOrNil, newAnchor, errorOrNil) in
+                                                guard let samples = samplesOrNil, let deletedObjects = deletedObjectsOrNil else {
+                                                    fatalError("*** An error occurred during the initial query: \(errorOrNil!.localizedDescription) ***")
+                                                }
+                                                
+                                                anchor = newAnchor!
+                                                
+                                                
+                                                do {
+                                                    let data = try NSKeyedArchiver.archivedData(withRootObject: newAnchor as Any, requiringSecureCoding: true)
+                                                    UserDefaults.standard.set(data, forKey: "StepAnchor")
+                                                } catch {
+                                                    print("Unable to store new step anchor")
+                                                }
+                                                
+                                                //Disptach for HRV START
+                                                DispatchQueue.global(qos: .background).async {
+                                                    
+                                                    //STEP COUNT STARTs
+                                                    for stepCountSample in samples {
+                                                        print("Samples: \(stepCountSample)")
+                                                        
+                                                        let result = stepCountSample as! HKQuantitySample
+                                                        let count =  HKUnit.count()
+                                                        let stepCount = result.quantity.doubleValue(for: count)
+                                                        let stepCountUnit = "steps"
+                                                        
+                                                        //                let deviceUUID = stepCountSample.uuid
+                                                        let deviceIdentity = result.sourceRevision.source.name
+                                                        let deviceProductName = stepCountSample.device?.name
+                                                        let deviceProductType = result.sourceRevision.productType
+                                                        let deviceOSVersion = result.sourceRevision.version
+                                                        
+                                                        let startDate = stepCountSample.startDate
+                                                        let endDate = stepCountSample.endDate
+                                                        let sourceRevision = stepCountSample.sourceRevision
+                                                        let eventID = stepCountSample.uuid
+                                                        
+                                                        var y:[String:Any] =  [:]
+                                                        y["stepCount"] =  stepCount
+                                                        y["stepCountUnit"] = stepCountUnit
+                                                        y["deviceIdentity"] =  deviceIdentity
+                                                        y["deviceProductName"] =  deviceProductName
+                                                        y["deviceProductType"] =  deviceProductType
+                                                        y["deviceOSVersion"] =  deviceOSVersion
+                                                        y["startDate"] =  startDate
+                                                        y["endDate"] =  endDate
+                                                        y["eventID"] =  eventID.uuidString
+                                                        y["sourceID"] = sourceRevision.source.bundleIdentifier
+                                                        y["recordingType"] = "addition"
+                                                        //let sampleContext = result.metadata as Any
+                                                        
+                                                        y["sampleContext"] = "NA"
+                                                        
+                                                        y["dataTransferDate"] = self.utc_date_formatter.string(from: Date())
+                                                        y["UIDeviceIdentifierForVendor"] = self.UIDeviceIdentifierForVendor
+                                                        
+                                                        print("dataDictionary y:\n \(y) \n \n")
+                                                       // self.sendDictionaryDataToFirebase(x: y, collectionName: "step_counts")
+                                                        
+                                                        let handle = Auth.auth().addStateDidChangeListener { (auth, user) in
+                                                            if let user = user {
+                                                                print("theUser \(user)")
+                                                                let uid = user.uid
+                                                                let email = user.email ?? "email@dk.unk"
+                                                                //let photoURL = user.photoURL
+                                                                
+                                                                y["userID"] = uid
+                                                                y["author_id"] = uid
+                                                                y["userEmail"] = email
+                                                                
+                                                                
+                                                                var ref: DocumentReference? = nil
+                                                                ref = self.db.collection("step_counts").addDocument(data: y) { err in
+                                                                    if let err = err {
+                                                                        print("Error adding document: \(err)")
+                                                                    } else {
+                                                                        print("stepCountSample Document added with ID: \(ref!.documentID)")
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    //STEP COUNT ENDs
+                                                    
+                                                    
+                                                }
+                                                //END DISPATCH for step counts
+                                                
+                                                
+                                                
+                                                for deletedstepCountSample in deletedObjects {
+                                                    print("deleted: \(deletedstepCountSample)")
+                                                }
+                                                
+                                                print("Step Anchor: \(anchor)")
+            }
+            
+            query.updateHandler = { (query, samplesOrNil, deletedObjectsOrNil, newAnchor, errorOrNil) in
+                
+                guard let samples = samplesOrNil, let deletedObjects = deletedObjectsOrNil else {
+                    // Handle the error here.
+                    fatalError("*** An error occurred during an update: \(errorOrNil!.localizedDescription) ***")
+                }
+                
+                anchor = newAnchor!
+                do {
+                    let data = try NSKeyedArchiver.archivedData(withRootObject: newAnchor as Any, requiringSecureCoding: true)
+                    UserDefaults.standard.set(data, forKey: "StepAnchor")
+                } catch {
+                    print("Unable to store new step anchor")
+                }
+                
+                //Dispatch STARTS
+                DispatchQueue.global(qos: .background).async {
+                
+                    //STEPS Start
+                for stepCountSample in samples {
+                    
+                    print("Samples: \(stepCountSample)")
+                    //STEP COUNT Update STARTs
+                    for stepCountSample in samples {
+                        print("Samples: \(stepCountSample)")
+                        
+                        let result = stepCountSample as! HKQuantitySample
+                        let count =  HKUnit.count()
+                        let stepCount = result.quantity.doubleValue(for: count)
+                        let stepCountUnit = "steps"
+                        
+                        //                let deviceUUID = stepCountSample.uuid
+                        let deviceIdentity = result.sourceRevision.source.name
+                        let deviceProductName = stepCountSample.device?.name
+                        let deviceProductType = result.sourceRevision.productType
+                        let deviceOSVersion = result.sourceRevision.version
+                        
+                        let startDate = stepCountSample.startDate
+                        let endDate = stepCountSample.endDate
+                        let sourceRevision = stepCountSample.sourceRevision
+                        let eventID = stepCountSample.uuid
+                        
+                        var y:[String:Any] =  [:]
+                        y["stepCount"] =  stepCount
+                        y["stepCountUnit"] = stepCountUnit
+                        y["deviceIdentity"] =  deviceIdentity
+                        y["deviceProductName"] =  deviceProductName
+                        y["deviceProductType"] =  deviceProductType
+                        y["deviceOSVersion"] =  deviceOSVersion
+                        y["startDate"] =  startDate
+                        y["endDate"] =  endDate
+                        y["eventID"] =  eventID.uuidString
+                        y["sourceID"] = sourceRevision.source.bundleIdentifier
+                        y["recordingType"] = "update"
+                        //let sampleContext = result.metadata as Any - not needed steps are calculated whole walking s othe context is known
+                        y["sampleContext"] = "NA"
+                        y["dataTransferDate"] = self.utc_date_formatter.string(from: Date())
+                        y["UIDeviceIdentifierForVendor"] = self.UIDeviceIdentifierForVendor
+                        
+                        print("dataDictionary y:\n \(y) \n \n")
+                        //self.sendDictionaryDataToFirebase(x: y, collectionName: "step_counts")
+                        
+                         let handle = Auth.auth().addStateDidChangeListener { (auth, user) in
+                         if let user = user {
+                         print("theUser \(user)")
+                         let uid = user.uid
+                         let email = user.email
+                         //let photoURL = user.photoURL
+                         
+                         y["userID"] = uid
+                         y["author_id"] = uid
+                         y["userEmail"] = email
+                         
+                         
+                         
+                         var ref: DocumentReference? = nil
+                         ref = self.db.collection("step_counts").addDocument(data: y) { err in
+                         if let err = err {
+                         print("Error adding document: \(err)")
+                         } else {
+                         print("stepCountSample Document updated with ID: \(ref!.documentID)")
+                         }
+                         }
+                         }
+                         }
+                    }
+                    //STEP COUNT Update ENDs
+                    } //global ends
+                }
+                
+                for deletedstepCountSample in deletedObjects {
+                    print("deleted: \(deletedstepCountSample)")
+                }
+            }
+            
+            healthStore.execute(query)
+        }
+        
+        
+        func performAnchoredQueryForSleepAnalysis() {
+            guard let sleepSampleType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) else {
+                fatalError("*** Unable to get the sleep rate type ***")
+            }
+            
+            var anchor = HKQueryAnchor.init(fromValue: 0)
+            
+            if UserDefaults.standard.object(forKey: "SleepAnchor") != nil {
+                let data = UserDefaults.standard.object(forKey: "SleepAnchor") as! Data
+                do {
+                    anchor = try NSKeyedUnarchiver.unarchivedObject(ofClass: HKQueryAnchor.self, from: data)!
+                } catch {
+                    print("Unable to store new anchor")
+                }
+                
+                
+            }
+            
+            let query = HKAnchoredObjectQuery(type: sleepSampleType,
+                                              predicate: nil,
+                                              anchor: anchor,
+                                              limit: HKObjectQueryNoLimit) { (query, samplesOrNil, deletedObjectsOrNil, newAnchor, errorOrNil) in
+                                                
+                                                guard let samples = samplesOrNil, let deletedObjects = deletedObjectsOrNil else {
+                                                    fatalError("*** An error occurred during the initial query: \(errorOrNil!.localizedDescription) ***")
+                                                }
+                                                
+                                                anchor = newAnchor!
+                                                do {
+                                                    let data = try NSKeyedArchiver.archivedData(withRootObject: anchor, requiringSecureCoding: true)
+                                                    UserDefaults.standard.set(data, forKey: "SleepAnchor")
+                                                } catch {
+                                                    print("Unable to store new sleep anchor")
+                                                }
+                                                
+                                                
+                                                //                                           var dataDictionary = [String: Any]()
+                                                
+                                                
+                                                //Dispatch STARTS
+                                                DispatchQueue.global(qos: .background).async {
+                                                    
+                                                    //NEW sleep SAMPLES START
+                                                    for sleepRateSample in samples {
+                                                        
+                                                        print("Samples: Endate Date \(sleepRateSample.endDate) startDate: \(sleepRateSample.startDate) \(sleepRateSample.uuid) \(String(describing: sleepRateSample.value(forKey: "metadata")))")
+                                                        
+                                                        let result = sleepRateSample as! HKCategorySample
+                                                        
+                                                        let sleepRate = (result.value == HKCategoryValueSleepAnalysis.inBed.rawValue) ? "InBed" : "Asleep"
+                                                        let sleepRateUnit = "status"
+                                                        
+                                                        //                let deviceUUID = sleepRateSample.uuid
+                                                        let deviceIdentity = result.sourceRevision.source.name
+                                                        let deviceProductName = sleepRateSample.device?.name
+                                                        let deviceProductType = result.sourceRevision.productType
+                                                        let deviceOSVersion = result.sourceRevision.version
+                                                        
+                                                        let startDate = sleepRateSample.startDate
+                                                        let endDate = sleepRateSample.endDate
+                                                        let sourceRevision = sleepRateSample.sourceRevision
+                                                        let eventID = sleepRateSample.uuid
+                                                        //let sampleContext = result.metadata
+                                                        
+                                                        var y:[String:Any] =  [:]
+                                                        y["sleepStatus"] =  sleepRate
+                                                        y["sleepStatusUnit"] =  sleepRateUnit
+                                                        y["deviceIdentity"] =  deviceIdentity
+                                                        y["deviceProductName"] =  deviceProductName
+                                                        y["deviceProductType"] =  deviceProductType
+                                                        y["deviceOSVersion"] =  deviceOSVersion
+                                                        y["startDate"] =  startDate
+                                                        y["endDate"] =  endDate
+                                                        y["eventID"] =  eventID.uuidString
+                                                        y["sourceID"] = sourceRevision.source.bundleIdentifier
+                                                        
+                                                        
+                                                        y["dataTransferDate"] = self.utc_date_formatter.string(from: Date())
+                                                        
+
+                                                        y["sampleContext"] = "not set"
+                                                        y["recordingType"] = "addition"
+                                                        y["UIDeviceIdentifierForVendor"] = self.UIDeviceIdentifierForVendor
+                                                        
+                                                        print("dataDictionary y:\n \(y) \n \n")
+                                                        
+                                                        //self.sendDictionaryDataToFirebase(x: y, collectionName: "sleep_status")
+                                                       
+                                                        let handle = Auth.auth().addStateDidChangeListener { (auth, user) in
+                                                            if let user = user {
+                                                                print("theUser \(user)")
+                                                                let uid = user.uid
+                                                                let email = user.email
+                                                                //let photoURL = user.photoURL
+                                                                y["userID"] = uid
+                                                                y["userEmail"] = email
+                                                                y["author_id"] = uid
+                                                                
+                                                                var ref: DocumentReference? = nil
+                                                                ref = self.db.collection("sleep_status").addDocument(data: y) { err in
+                                                                    if let err = err {
+                                                                        print("Error adding document: \(err)")
+                                                                    } else {
+                                                                        print("sleepRateSample Document added with ID: \(ref!.documentID)")
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        
+                                                    }
+                                                    //NEW sleep SAMPLES END
+                                                    
+                                                }
+                                                //global ends here
+                                                
+                                                for deletedsleepRateSample in deletedObjects {
+                                                    print("deleted: \(deletedsleepRateSample)")
+                                                }
+                                                
+                                                print("sleep Rate Anchor: \(anchor)")
+            }
+            
+            query.updateHandler = { (query, samplesOrNil, deletedObjectsOrNil, newAnchor, errorOrNil) in
+                
+                guard let samples = samplesOrNil, let deletedObjects = deletedObjectsOrNil else {
+                    // Handle the error here.
+                    fatalError("*** An error occurred during an update: \(errorOrNil!.localizedDescription) ***")
+                }
+                
+                anchor = newAnchor!
+                
+                do {
+                    let data = try NSKeyedArchiver.archivedData(withRootObject: newAnchor as Any, requiringSecureCoding: true)
+                    UserDefaults.standard.set(data, forKey: "SleepAnchor")
+                    print(data.first as Any)
+                } catch {
+                    print("Unable to store new sleep anchor")
+                }
+                
+                //Dispatch STARTS
+                DispatchQueue.global(qos: .background).async {
+                    
+                //sleep Update Handler starts
+                for sleepRateSample in samples {
+                    print("Samples HR: endDate \(sleepRateSample.endDate) startDate: \(sleepRateSample.startDate) uuid: \(sleepRateSample.uuid) meta: \n \(String(describing: sleepRateSample.value(forKey: "metadata"))) \n sampleType: \(sleepRateSample.sampleType) sourceRevision: \(sleepRateSample.sourceRevision) device: \(String(describing: sleepRateSample.device))")
+                    
+                    //NEW sleep SAMPLES START
+                    for sleepRateSample in samples {
+                        
+                        print("Samples: Endate Date \(sleepRateSample.endDate) startDate: \(sleepRateSample.startDate) \(sleepRateSample.uuid) \(String(describing: sleepRateSample.value(forKey: "metadata")))")
+                        
+                        let result = sleepRateSample as! HKCategorySample
+                        
+                        let sleepRate = (result.value == HKCategoryValueSleepAnalysis.inBed.rawValue) ? "InBed" : "Asleep"
+                        let sleepRateUnit = "status"
+                        
+                        //                let deviceUUID = sleepRateSample.uuid
+                        let deviceIdentity = result.sourceRevision.source.name
+                        let deviceProductName = sleepRateSample.device?.name
+                        let deviceProductType = result.sourceRevision.productType
+                        let deviceOSVersion = result.sourceRevision.version
+                        
+                        let startDate = sleepRateSample.startDate
+                        let endDate = sleepRateSample.endDate
+                        let sourceRevision = sleepRateSample.sourceRevision
+                        let eventID = sleepRateSample.uuid
+                        //let sampleContext = result.metadata
+                        
+                        var y:[String:Any] =  [:]
+                        y["sleepStatus"] =  sleepRate
+                        y["sleepStatusUnit"] =  sleepRateUnit
+                        y["deviceIdentity"] =  deviceIdentity
+                        y["deviceProductName"] =  deviceProductName
+                        y["deviceProductType"] =  deviceProductType
+                        y["deviceOSVersion"] =  deviceOSVersion
+                        y["startDate"] =  startDate
+                        y["endDate"] =  endDate
+                        y["eventID"] =  eventID.uuidString
+                        y["sourceID"] = sourceRevision.source.bundleIdentifier
+                        
+                        
+                        y["dataTransferDate"] = self.utc_date_formatter.string(from: Date())
+                        
+
+                        y["sampleContext"] = "not set"
+                        y["recordingType"] = "addition"
+                        y["UIDeviceIdentifierForVendor"] = self.UIDeviceIdentifierForVendor
+                        
+                        print("dataDictionary y:\n \(y) \n \n")
+                        
+                        //self.sendDictionaryDataToFirebase(x: y, collectionName: "sleep_status")
+                        
+                        let handle = Auth.auth().addStateDidChangeListener { (auth, user) in
+                            if let user = user {
+                                print("theUser \(user)")
+                                let uid = user.uid
+                                let email = user.email
+                                //let photoURL = user.photoURL
+                                y["userID"] = uid
+                                y["userEmail"] = email
+                                y["author_id"] = uid
+                                
+                                var ref: DocumentReference? = nil
+                                ref = self.db.collection("sleep_status").addDocument(data: y) { err in
+                                    if let err = err {
+                                        print("Error adding document: \(err)")
+                                    } else {
+                                        print("sleepRateSample Document added with ID: \(ref!.documentID)")
+                                    }
+                                }
+                            }
+                        }
+                        
+                    }
+                    //NEW sleep SAMPLES END
+                    } //global ends
+                    
+                }
+                
+                
+                
+                for deletedsleepRateSample in deletedObjects {
+                    print("deleted: \(deletedsleepRateSample)")
+                }
+            }
+            
+            healthStore.execute(query)
+        }
+       
     
     
     
