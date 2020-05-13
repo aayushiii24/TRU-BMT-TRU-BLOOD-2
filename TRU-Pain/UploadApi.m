@@ -73,7 +73,7 @@ static NSString * const kShareFileSymptomFocus = @"symptomFocus.csv";
         _session = [self session];
     }
     
-    self.username = [SAMKeychain passwordForService:@"comSicklesoftTRUBMT" account:@"username"];
+    self.username = [SAMKeychain passwordForService:@"comSicklesoftTRUBMT" account:@"username_TRU-BLOOD"];
     NSString * urlString = [NSString stringWithFormat:@"%@/%@/%@/%@/%@", kShareFileBaseURL, kShareFileBaseFolder,_username,kShareFileDataFolder,fileName];
     NSURL *URL = [NSURL URLWithString:urlString];
     NSLog(@"upload movie to URL from -(void) upload:(NSURL *)filePath fileName:(NSString *)fileName: %@ from filepath %@", URL, filePath);
@@ -99,7 +99,7 @@ static NSString * const kShareFileSymptomFocus = @"symptomFocus.csv";
 
 -(void) uploadJSON:(NSURL *)filePath fileName:(NSString *)fileName {
     NSLog(@"fileName %@ to be uploaded",fileName);
-    self.username = [SAMKeychain passwordForService:@"comSicklesoftTRUBMT" account:@"username"];
+    self.username = [SAMKeychain passwordForService:@"comSicklesoftTRUBMT" account:@"username_TRU-BLOOD"];
     NSString * urlString = [NSString stringWithFormat:@"%@/%@/%@/%@/%@", kShareFileBaseURL, kShareFileBaseFolder,_username,kShareFileDataFolder,fileName];
     NSURL *URL = [NSURL URLWithString:urlString];
     NSLog(@"upload movie to URL from thanksViewController: %@ from filepath %@", URL, filePath);
@@ -110,10 +110,10 @@ static NSString * const kShareFileSymptomFocus = @"symptomFocus.csv";
             NSLog(@"Yeah, file in Upload API %@ uploaded from thank you view controller to URL:%@", URL, fileName);
             // Invalidate Session
             // [self webDataJSON];
-            [_session finishTasksAndInvalidate];
+            [self->_session finishTasksAndInvalidate];
         } else {
             NSLog(@"response from server: %@", response);
-            _backgroundSession = [self backgroundSession];
+            self->_backgroundSession = [self backgroundSession];
             [self uploadInBackground:filePath fileName:fileName];
         }
     }];
@@ -140,9 +140,9 @@ static NSString * const kShareFileSymptomFocus = @"symptomFocus.csv";
 //Sessions and Sessions' Delegates
 - (NSURLSession *)session {
     static NSURLSession *session = nil;
-    self.username = [SAMKeychain passwordForService:@"comSicklesoftTRUBMT" account:@"username"];
+    self.username = [SAMKeychain passwordForService:@"comSicklesoftTRUBMT" account:@"username_TRU-BLOOD"];
     //auth
-    NSString *password = [SAMKeychain passwordForService:@"comSicklesoftTRUBMT" account:_username];
+    NSString *password = [SAMKeychain passwordForService:@"comSicklesoftTRUBMT" account:@"password_TRU-BLOOD"];
     NSString *authStr = [NSString stringWithFormat:@"%@:%@", self.username, password];
     //
     
@@ -164,10 +164,10 @@ static NSString * const kShareFileSymptomFocus = @"symptomFocus.csv";
 - (NSURLSession *)backgroundSession {
     static NSURLSession *backgroundSession = nil;
     
-    self.username = [SAMKeychain passwordForService:@"comSicklesoftTRUBMT" account:@"username"];
+    self.username = [SAMKeychain passwordForService:@"comSicklesoftTRUBMT" account:@"username_TRU-BLOOD"];
     //auth
     
-    NSString *password = [SAMKeychain passwordForService:@"comSicklesoftTRUBMT" account:_username];
+    NSString *password = [SAMKeychain passwordForService:@"comSicklesoftTRUBMT" account:@"password_TRU-BLOOD"];
     NSString *authStr = [NSString stringWithFormat:@"%@:%@", self.username, password];
     NSLog(@"user pass: %@,%@",_username,password);
     //
@@ -195,7 +195,7 @@ static NSString * const kShareFileSymptomFocus = @"symptomFocus.csv";
 - (void)URLSessionDidFinishEventsForBackgroundURLSession:(NSURLSession *)session {
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     if (appDelegate.backgroundSessionCompletionHandler) {
-        void (^completionHandler)() = appDelegate.backgroundSessionCompletionHandler;
+        void (^completionHandler)(void) = appDelegate.backgroundSessionCompletionHandler;
         appDelegate.backgroundSessionCompletionHandler = nil;
         completionHandler();
     }
@@ -209,7 +209,7 @@ static NSString * const kShareFileSymptomFocus = @"symptomFocus.csv";
         NSLog(@"pre lastCount %ld", (long)count);
         if (!count) {
             AppDelegate *applicationDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-            void (^backgroundSessionCompletionHandler)() = [applicationDelegate backgroundSessionCompletionHandler];
+            void (^backgroundSessionCompletionHandler)(void) = [applicationDelegate backgroundSessionCompletionHandler];
             
             if (backgroundSessionCompletionHandler) {
                 NSLog(@"LASTcount post %ld", (long)count);

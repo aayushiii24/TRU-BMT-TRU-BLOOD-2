@@ -167,7 +167,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     @available(iOS 11.0, *)
     func dataTypesToRead() -> Set<HKObjectType> {
         return Set(arrayLiteral:
-            HKObjectType.characteristicType(forIdentifier: HKCharacteristicTypeIdentifier.dateOfBirth)!,
+//            HKObjectType.characteristicType(forIdentifier: HKCharacteristicTypeIdentifier.dateOfBirth)!,
                    HKObjectType.characteristicType(forIdentifier: HKCharacteristicTypeIdentifier.biologicalSex)!,
                    HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bodyMass)!,
                    HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.height)!,
@@ -185,8 +185,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     
     func dataTypesToWrite() -> Set<HKSampleType> {
         return Set(arrayLiteral:
-            HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bodyMass)!,
-                   HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.height)!,
+            //HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bodyMass)!,
+            //HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.height)!,
                    HKObjectType.workoutType()
         )
     }
@@ -194,8 +194,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     @available(iOS 11.0, *)
     func queryForUpdates(type: HKObjectType) {
         switch type {
-        case HKObjectType.characteristicType(forIdentifier: HKCharacteristicTypeIdentifier.dateOfBirth)!:
-            debugPrint("HKCharacteristicTypeIdentifierDateOfBirth")
+//        case HKObjectType.characteristicType(forIdentifier: HKCharacteristicTypeIdentifier.dateOfBirth)!:
+//            debugPrint("HKCharacteristicTypeIdentifierDateOfBirth")
         case HKObjectType.characteristicType(forIdentifier: HKCharacteristicTypeIdentifier.biologicalSex)!:
             debugPrint("HKCharacteristicTypeIdentifier.biologicalSex")
         case HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.heartRate)!:
@@ -221,7 +221,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         
     }
     
-    func getRecentSteps()  {
+   /* func getRecentSteps()  {
         if HKHealthStore.isHealthDataAvailable()
         {
             // Create the step count type.
@@ -283,7 +283,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             // Run the query.
             healthStore.execute(query)
         }
-    }
+    }*/
     
     func setUpBackgroundDeliveryForDataTypes(types: Set<HKObjectType>) {
         for type in types {
@@ -314,7 +314,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     
     @available(iOS 11.0, *)
     func requestAccessWithCompletion() {
-        healthStore.requestAuthorization(toShare: dataTypesToWrite(), read: dataTypesToRead()) { (success, error) -> Void in
+        healthStore.requestAuthorization(toShare: nil, read: dataTypesToRead()) { (success, error) -> Void in
             if success {
                 print("success")
                 self.setUpBackgroundDeliveryForDataTypes(types:self.dataTypesToRead())

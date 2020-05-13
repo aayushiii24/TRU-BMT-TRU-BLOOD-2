@@ -33,20 +33,20 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
     @IBOutlet weak var registerButton: UIButton!
     
     //Firebase// create reference to database and data storage
-//    var userStorage: FIRStorageReference!
-//    var ref: FIRDatabaseReference!
+    //    var userStorage: FIRStorageReference!
+    //    var ref: FIRDatabaseReference!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         //TESTING CODE
         /*let manager = ListDataManager()
-        let previousSymtoms = manager.findTodaySymptomFocus(date: "2018JUN21")
-        let symptoms = manager.findSymptomFocus(entityName: "DSymptomFocus") as [DSymptomFocus]
-        print("Symptom- previous \(symptoms) anything")
-        for item in symptoms {
-            print("Symptom- date \(item.dateString) anything")
-            print("Symptom- name \(item.name) anything")
-        }*/
+         let previousSymtoms = manager.findTodaySymptomFocus(date: "2018JUN21")
+         let symptoms = manager.findSymptomFocus(entityName: "DSymptomFocus") as [DSymptomFocus]
+         print("Symptom- previous \(symptoms) anything")
+         for item in symptoms {
+         print("Symptom- date \(item.dateString) anything")
+         print("Symptom- name \(item.name) anything")
+         }*/
         //END: TESTING
         
         //self.docRef = Firestore.firestore().document("friends/profile")
@@ -54,7 +54,7 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
         
         let standardDefaults = UserDefaults.standard
         if standardDefaults.object(forKey: "ORKSampleFirstRun") as! String == "ORKSampleFirstRun" {
-          self.loginButton.isHidden = true
+            self.loginButton.isHidden = true
             self.usernameTextField.isEnabled = false
             self.passwordTextField.isEnabled = false
             
@@ -72,31 +72,31 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
             settings.isPersistenceEnabled = true
             
             
-//            var ref: DocumentReference? = nil
-//            ref = self.db.collection("users").addDocument(data: [
-//                "first": "Ada",
-//                "last": "Lovelace",
-//                "born": 1815
-//            ]) { err in
-//                if let err = err {
-//                    print("Error adding document: \(err)")
-//                } else {
-//                    print("Document added with ID: \(ref!.documentID)")
-//                }
-//            }
+            //            var ref: DocumentReference? = nil
+            //            ref = self.db.collection("users").addDocument(data: [
+            //                "first": "Ada",
+            //                "last": "Lovelace",
+            //                "born": 1815
+            //            ]) { err in
+            //                if let err = err {
+            //                    print("Error adding document: \(err)")
+            //                } else {
+            //                    print("Document added with ID: \(ref!.documentID)")
+            //                }
+            //            }
             
         }
         
         
         
-//        Auth.auth().createUser(withEmail: "sicklecell@me.com", password: "Welcome8_") { (user, error) in
-//            // ...
-//        }
+        //        Auth.auth().createUser(withEmail: "sicklecell@me.com", password: "Welcome8_") { (user, error) in
+        //            // ...
+        //        }
         
-//        GIDSignIn.sharedInstance().uiDelegate = self as! GIDSignInUIDelegate
-//        GIDSignIn.sharedInstance().signIn()
+        //        GIDSignIn.sharedInstance().uiDelegate = self as! GIDSignInUIDelegate
+        //        GIDSignIn.sharedInstance().signIn()
         
-
+        
         
         
         // [START get_iid_token]
@@ -110,43 +110,43 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
         
     }
     
-   // MARK: - Google Sign in
-//    @IBAction func loginWithGoogle(_ sender: Any) {
-//        GIDSignIn.sharedInstance().uiDelegate = self as! GIDSignInUIDelegate
-//        GIDSignIn.sharedInstance().signIn()
-//
-//
-//
-//    }
+    // MARK: - Google Sign in
+    //    @IBAction func loginWithGoogle(_ sender: Any) {
+    //        GIDSignIn.sharedInstance().uiDelegate = self as! GIDSignInUIDelegate
+    //        GIDSignIn.sharedInstance().signIn()
+    //
+    //
+    //
+    //    }
     
-//
-//    func sign(_ signIn: GIDSignIn!, didSignInFor user: GIDGoogleUser!, withError error: Error?) {
-//        // ...
-//
-//        if let error = error {
-//            // ...
-//            print(error)
-//            return
-//        }
-//
-//        guard let authentication = user.authentication else { return }
-//        let credential = GoogleAuthProvider.credential(withIDToken: authentication.idToken,
-//                                                          accessToken: authentication.accessToken)
-//
-//        Auth.auth().signIn(with: credential) { (user, error) in
-//            // ...
-//            print("signed in successfully")
-//            if let error = error {
-//                // ...
-//                print(error)
-//                return
-//            }
-//        }
-//
-//    }
-//
+    //
+    //    func sign(_ signIn: GIDSignIn!, didSignInFor user: GIDGoogleUser!, withError error: Error?) {
+    //        // ...
+    //
+    //        if let error = error {
+    //            // ...
+    //            print(error)
+    //            return
+    //        }
+    //
+    //        guard let authentication = user.authentication else { return }
+    //        let credential = GoogleAuthProvider.credential(withIDToken: authentication.idToken,
+    //                                                          accessToken: authentication.accessToken)
+    //
+    //        Auth.auth().signIn(with: credential) { (user, error) in
+    //            // ...
+    //            print("signed in successfully")
+    //            if let error = error {
+    //                // ...
+    //                print(error)
+    //                return
+    //            }
+    //        }
+    //
+    //    }
+    //
     
-   
+    
     
     
     func registrationFailed()  {
@@ -171,7 +171,7 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
             textField.keyboardType = .default
             textField.isSecureTextEntry = true
             textField.placeholder = "password"
-           //textField.text = "Welcome8_"
+            //textField.text = "Welcome8_"
         }
         
         
@@ -197,7 +197,7 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
         alert.addAction(cancelAction)
         alert.addAction(saveAction)
         present(alert, animated: true)
-
+        
     }
     
     @IBAction func registerAction(_ sender: Any) {
@@ -250,72 +250,79 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
         alert.addAction(saveAction)
         present(alert, animated: true)
     }
-
+    
     
     func update(user: String?, password: String?, study: String?) {
         let standardDefaults = UserDefaults.standard
         //let studyName = study?.uppercased()
         let credential = URLCredential(user: user!, password: password!, persistence: .none)
         //Alamofire.request("https://scdi.sharefile-webdav.com:443/Dev/SMARTa/\(user!)/\(studyName!)/profile.json")
-            //change generic profile data to Onboard/BMT.json or Onboard/VOPAM.json or Onboard/SCD.json or Onboard/SCDF.json
-            //change address "https://scdi.sharefile-webdav.com:443/Dev/SMARTa/\(user!)/\(studyName!)/profile.json"
-            //to https://scdi.sharefile-webdav.com:443/\(studyName!)/profile.json"
-            //Ensure that user has download access to the profile
-            //If register button is used esure that the database for CareKit is cleared to be reprogrammed
-            //Should a dump upload of current data occur in the background prior to wiping out CareKit
+        //change generic profile data to Onboard/BMT.json or Onboard/VOPAM.json or Onboard/SCD.json or Onboard/SCDF.json
+        //change address "https://scdi.sharefile-webdav.com:443/Dev/SMARTa/\(user!)/\(studyName!)/profile.json"
+        //to https://scdi.sharefile-webdav.com:443/\(studyName!)/profile.json"
+        //Ensure that user has download access to the profile
+        //If register button is used esure that the database for CareKit is cleared to be reprogrammed
+        //Should a dump upload of current data occur in the background prior to wiping out CareKit
         Alamofire.request("https://scdi.sharefile-webdav.com:443/Dev/SMARTa/\(user!)/Preferences/preference.json")
             .authenticate(usingCredential: credential)
-            .responseJSON { response in
+            .responseString { response in
+                print("https://scdi.sharefile-webdav.com:443/Dev/SMARTa/\(user!)/Preferences/preference.json")
+                print("-debugPrint(response.result)")
+                debugPrint(response.result.isSuccess)
+                debugPrint(response.result)
+                
                 print("debugPrint(response.result.value)")
-                debugPrint(response.result.value)
+                debugPrint(response.result.value as Any)
                 print("debugPrint(response.data)")
                 debugPrint(response.data ?? "no data")
-            
-//                guard String(describing: response.result).lowercased().range(of:"failure") == nil else {
-//                    print("registration failed")
-//                    self.registrationFailed()
-//                    return
-//                }
-                    print("Yeah, response not nil")
-                    
-                    self.loginButton.isHidden = false
+                
+                guard response.result.isSuccess else {
+                    print("registration failed")
+                    self.registrationFailed()
+                    return
+                }
+                
+                print("Yeah, response not nil")
+                
+                self.loginButton.isHidden = false
                 self.usernameTextField.isEnabled = true
                 self.passwordTextField.isEnabled = true
-                    self.usernameTextField.text = user
-                    self.passwordTextField.text = password
-                    let keychain = KeychainSwift()
-                    keychain.delete("username_TRU-BLOOD")
-                    keychain.delete("password_TRU-BLOOD")
-                    
-                    keychain.set(user!, forKey: "username_TRU-BLOOD", withAccess: .accessibleWhenUnlocked)
-                    keychain.set(password!, forKey: "password_TRU-BLOOD", withAccess: .accessibleWhenUnlocked)
-                    if let dict = response.result.value as? JSONStandard {
-                        for (key,value) in dict {
-                            print("\(key) = \(value)")
-                            keychain.set(value as! String, forKey: key, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
-                            SAMKeychain.setPassword(value as! String, forService: "comSicklesoftTRUBMT", account:key)
-                       
-                            if key == "Institution" {
-                                SAMKeychain.setAccessibilityType(kSecAttrAccessibleWhenUnlocked)
-                                SAMKeychain.setPassword(value as! String, forService: "comSicklesoftTRUBMT", account: "Institution")
-                                standardDefaults.set(value, forKey: "Institution")
-                            }
-                            if key == "Study" {
-                                standardDefaults.set(value, forKey: "Study")
-                            }
-                            if key == "DaysOfData" {
-                                standardDefaults.set(value, forKey: "DaysOfData")
-                            }
-                            if key == "DaysOfDataNum" {
-                                standardDefaults.set(value, forKey: "DaysOfDataNum")
-                            }
+                self.usernameTextField.text = user
+                self.passwordTextField.text = password
+                let keychain = KeychainSwift()
+                keychain.delete("username_TRU-BLOOD")
+                keychain.delete("password_TRU-BLOOD")
+                
+                keychain.set(user!, forKey: "username_TRU-BLOOD", withAccess: .accessibleWhenUnlocked)
+                keychain.set(password!, forKey: "password_TRU-BLOOD", withAccess: .accessibleWhenUnlocked)
+                if let dict = response.result.value as? JSONStandard {
+                    for (key,value) in dict {
+                        print("\(key) = \(value)")
+                        keychain.set(value as! String, forKey: key, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
+                        SAMKeychain.setPassword(value as! String, forService: "comSicklesoftTRUBMT", account:key)
+                        
+                        if key == "Institution" {
+                            SAMKeychain.setAccessibilityType(kSecAttrAccessibleWhenUnlocked)
+                            SAMKeychain.setPassword(value as! String, forService: "comSicklesoftTRUBMT", account: "Institution")
+                            standardDefaults.set(value, forKey: "Institution")
+                        }
+                        if key == "Study" {
+                            standardDefaults.set(value, forKey: "Study")
+                        }
+                        if key == "DaysOfData" {
+                            standardDefaults.set(value, forKey: "DaysOfData")
+                        }
+                        if key == "DaysOfDataNum" {
+                            standardDefaults.set(value, forKey: "DaysOfDataNum")
                         }
                     }
+                }
                 
                 keychain.set(user!, forKey: "Email")
-                    SAMKeychain.setPassword(user!, forService: "comSicklesoftTRUBMT", account: "username")
-                    SAMKeychain.setPassword(password!, forService: "comSicklesoftTRUBMT", account: user!)
-                    standardDefaults.setValue("Done", forKey: "ORKSampleFirstRun")
+                SAMKeychain.setPassword(user!, forService: "comSicklesoftTRUBMT", account: "username_TRU-BLOOD")
+                SAMKeychain.setPassword(password!, forService: "comSicklesoftTRUBMT", account: "password_TRU-BLOOD")
+                standardDefaults.setValue("Done", forKey: "ORKSampleFirstRun")
+                print("username and password : \(String(describing: user)) : \(String(describing: password))")
                 
                 Auth.auth().createUser(withEmail: user!, password: password!) { (user, error) in
                     // ...
@@ -326,9 +333,9 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
     
     //FIREBASE//
     func firebaseUserLogin(user:String, password:String)  {
-     
+        
     }
-
+    
     
     
     func scheduleFirstReminderNotification() {
@@ -355,34 +362,34 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
         //let keychain = KeychainSwift()
         
         /*
- var firstReminderHourString = "10"
-        var firstReminderMinuteString = "00"
-        
-        
-        //remove non numeric characters if any
-        firstReminderHourString = firstReminderHourString.trimmingCharacters(in: NSCharacterSet(charactersIn: "0123456789.").inverted)
-        firstReminderMinuteString = firstReminderMinuteString.trimmingCharacters(in: NSCharacterSet(charactersIn: "0123456789.").inverted)
-        
-        if firstReminderHourString.characters.first == "0" && firstReminderHourString.characters.count > 1  && firstReminderHourString.characters.last != "0" {
-            firstReminderHourString.remove(at: firstReminderHourString.startIndex)
-        }
-        
-        if firstReminderMinuteString.characters.first == "0" && firstReminderMinuteString.characters.count > 1 && firstReminderHourString.characters.last != "0" {
-            firstReminderMinuteString.remove(at: firstReminderMinuteString.startIndex)
-        }
-        
-        if firstReminderHourString.characters.first == "0" && firstReminderHourString.characters.count > 1  && firstReminderHourString.characters.last == "0" {
-            firstReminderHourString = "0"
-        }
-        
-        if firstReminderMinuteString.characters.first == "0" && firstReminderMinuteString.characters.count > 1 && firstReminderHourString.characters.last == "0" {
-            firstReminderMinuteString = "0"
-        }
-
-        print("reminders time minute \(firstReminderHourString, firstReminderMinuteString)")
-        print(Int(firstReminderHourString) ?? -99)
-        print(Int(firstReminderMinuteString) ?? -99)
-*/
+         var firstReminderHourString = "10"
+         var firstReminderMinuteString = "00"
+         
+         
+         //remove non numeric characters if any
+         firstReminderHourString = firstReminderHourString.trimmingCharacters(in: NSCharacterSet(charactersIn: "0123456789.").inverted)
+         firstReminderMinuteString = firstReminderMinuteString.trimmingCharacters(in: NSCharacterSet(charactersIn: "0123456789.").inverted)
+         
+         if firstReminderHourString.characters.first == "0" && firstReminderHourString.characters.count > 1  && firstReminderHourString.characters.last != "0" {
+         firstReminderHourString.remove(at: firstReminderHourString.startIndex)
+         }
+         
+         if firstReminderMinuteString.characters.first == "0" && firstReminderMinuteString.characters.count > 1 && firstReminderHourString.characters.last != "0" {
+         firstReminderMinuteString.remove(at: firstReminderMinuteString.startIndex)
+         }
+         
+         if firstReminderHourString.characters.first == "0" && firstReminderHourString.characters.count > 1  && firstReminderHourString.characters.last == "0" {
+         firstReminderHourString = "0"
+         }
+         
+         if firstReminderMinuteString.characters.first == "0" && firstReminderMinuteString.characters.count > 1 && firstReminderHourString.characters.last == "0" {
+         firstReminderMinuteString = "0"
+         }
+         
+         print("reminders time minute \(firstReminderHourString, firstReminderMinuteString)")
+         print(Int(firstReminderHourString) ?? -99)
+         print(Int(firstReminderMinuteString) ?? -99)
+         */
         
         var dateComponents = DateComponents()
         dateComponents.hour = 22 //Int(firstReminderHourString)
@@ -406,8 +413,8 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
         content.userInfo = ["customData": "ReminderInfo"]
         content.sound = UNNotificationSound.default
         
-//        let study = self.study?.lowercased()
-//        let imageName = "crc2"+study!
+        //        let study = self.study?.lowercased()
+        //        let imageName = "crc2"+study!
         let urlpath     = Bundle.main.path(forResource: "crc2VopamVanderbilt", ofType: "png")
         let url         = NSURL.fileURL(withPath: urlpath!)
         if let studyCoordinatorImage = try? UNNotificationAttachment(identifier:
@@ -426,8 +433,8 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
         center.add(request)
         
     }
-
-
+    
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -439,7 +446,7 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
         
         let context = NSManagedObjectContext.default()
         
-        
+    
         // Create Fetch Request
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entity)
         
@@ -464,32 +471,42 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
         if keychain.get("username_TRU-BLOOD") != nil {
             
             if self.usernameTextField.text == keychain.get("username_TRU-BLOOD") &&  self.passwordTextField.text == keychain.get("password_TRU-BLOOD") {
-                Auth.auth().signIn(withEmail: self.usernameTextField.text!, password: self.passwordTextField.text!) { (user, error) in
+                let credential = URLCredential(user: self.usernameTextField.text!, password: self.usernameTextField.text!, persistence: .none)
+                let user = self.usernameTextField!.text!
+                let password = self.passwordTextField!.text!
+                
+                Auth.auth().signIn(withEmail: user, password: password) { (user, error) in
                     // ...
-                    print("user?.uid \(user?.uid)")
+                    print("user?.uid \(String(describing: user?.uid))")
                     self.db = Firestore.firestore()
-                   
+                    
                     let settings = FirestoreSettings()
                     Firestore.firestore().settings = settings
                     settings.isPersistenceEnabled = true
                     
-//                    var ref: DocumentReference? = nil
-//                    ref = self.db.collection("users").addDocument(data: [
-//                        "first": "Ada",
-//                        "last": "Lovelace",
-//                        "born": 1815
-//                    ]) { err in
-//                        if let err = err {
-//                            print("Error adding document: \(err)")
-//                        } else {
-//                            print("Document added with ID: \(ref!.documentID)")
-//                        }
-//                    }
-                    
+                }
+                Alamofire.request("https://scdi.sharefile-webdav.com:443/Dev/SMARTa/\(user)/Preferences/preference.json")
+                    .authenticate(usingCredential: credential)
+                    .responseJSON { response in
+                        
+                        print("https://scdi.sharefile-webdav.com:443/Dev/SMARTa/\(user)/Preferences/preference.json")
+                        print("-debugPrint(response.result)")
+                        debugPrint(response.result)
+                        print("-debugPrint(response.result.value)")
+                        debugPrint(response.result.value as Any)
+                        print("-debugPrint(response.data)")
+                        debugPrint(response.data ?? "no data")
+
+                        let keychain = KeychainSwift()
+                        if let dict = response.result.value as? JSONStandard {
+                            for (key,value) in dict {
+                                print("\(key) = \(value)")
+                                keychain.set(value as! String, forKey: key, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
+                                //SAMKeychain.setPassword(value as! String, forService: "comSicklesoftTRUBMT", account:key)
+                            }
+                        }
                 }
                 
-                
-
                 performSegue(withIdentifier: "toRootViewController", sender: nil)
                 
             } else {
@@ -515,17 +532,17 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
                                       message: "The username and/or password entered are not recognized.",
                                       preferredStyle: .alert)
         
-            
+        
         let cancelAction = UIAlertAction(title: "OK", style: .default)
         
         
         alert.addAction(cancelAction)
         present(alert, animated: true)
-
+        
     }
     
     
-
+    
 }
 
 

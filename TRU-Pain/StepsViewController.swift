@@ -30,7 +30,7 @@ class StepsViewController: UIViewController {
         debugLabel.text = "OK we are here."
         
         self.getDailySteps()
-        self.subscribeToHeartBeatChanges()
+        // self.subscribeToHeartBeatChanges()
         //        self.getWeeklySteps()
     }
     ///TEST FUNCTIONS
@@ -71,7 +71,7 @@ class StepsViewController: UIViewController {
                         
                         /// Updating the UI with the retrieved value
                         //self?.heartRateLabel.setText("\(Int(heartRate))")
-                        print("heart rate value \(Int(heartRate))")
+                        print("heart rate value in stepsViewController \(Int(heartRate))")
                     }
                 })
         }
@@ -116,6 +116,7 @@ class StepsViewController: UIViewController {
         
         self.healthStore.execute(query)
     }
+    
     func getWeeklySteps() {
         let calendar = NSCalendar.current
         

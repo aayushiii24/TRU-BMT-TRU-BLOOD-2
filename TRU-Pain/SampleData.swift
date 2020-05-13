@@ -77,9 +77,9 @@ class SampleData: NSObject {
                    image: UIImage(named: "ER.jpg")),
         
         OCKContact(contactType: .careTeam,
-                   name: "Kristi Romero",
+                   name: "Hilary Miller",
                    relation: "Study Coordinator",
-                   contactInfoItems:[.phone("919-684-1352"), .email("studycoordinator@icloud.com")],
+                   contactInfoItems:[.phone("919-668-7238"), .email("hilary.miller299@duke.edu")],
                    tintColor: Colors.blue.color,
                    monogram: "SC",
                    image: UIImage(named: "studyCoordinator.png")),

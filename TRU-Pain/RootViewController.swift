@@ -212,16 +212,47 @@ class RootViewController: UITabBarController {
     }
     
     // MARK: Healthstore_ request for authorization and 10 day range upload
+    
+    
+   
     func requestAuthorization()
     {
        print("requesting authorization to read heart data")
-        let readingTypes:Set = Set( [heartRateType] )
+      let readingTypes:Set = Set( [heartRateType] )
         
         //writing
         let writingTypes:Set = Set( [heartRateType] )
+        let keychain = KeychainSwift()
+     
+        let x = UploadsViewController()
+
+        var daysOfData = "-14" //self.readHeartRateData()
+         
+         if keychain.get("DaysOfData") != nil {
+             daysOfData = keychain.get("DaysOfData")!
+         }
+         
+        print("daysofdata \(String(describing: daysOfData))")
+         
+         let todayDate = Date() //
+         let calendar = Calendar.current
+         var daysAgoDate: Date?
+         daysAgoDate = calendar.date(byAdding: .day,
+                                           value: Int(daysOfData)!,
+                                           to: todayDate)
+         
+                         
+//         x.getHKHeartRateData(daysAgoDate!)
+//         x.getHKStepData(daysAgoDate!)
+//         x.getHKHeartRateVariabilityData(daysAgoDate!)
+//         self.retrieveSleepAnalysis(startDate: daysAgoDate!)
+        // self.performAnchoredQueryForHeartRate() //this would be anchored Query
+         
+         keychain.set("-14", forKey: "DaysOfData")
+        
         
         //auth request
-        healthStore.requestAuthorization(toShare: writingTypes, read: readingTypes) { (success, error) -> Void in
+       /* healthStore.requestAuthorization(toShare: nil, read: readingTypes) { (success, error) -> Void in
             
             if error != nil
             {
@@ -229,36 +260,14 @@ class RootViewController: UITabBarController {
             }
             else if success
             {
-                var daysOfData = "-10" //self.readHeartRateData()
-                let keychain = KeychainSwift()
-                if keychain.get("DaysOfData") != nil {
-                    daysOfData = keychain.get("DaysOfData")!
-                }
-                    
-//                let defaults = UserDefaults.standard
-//                let daysOfData = defaults.value(forKey: "daysOfData") as? String
-               print("daysofdata \(String(describing: daysOfData))")
                 
-                let todayDate = Date() //
-                let calendar = Calendar.current
-                var ninetyDaysAgoDate: Date?
-                ninetyDaysAgoDate = calendar.date(byAdding: .day,
-                                                  value: Int(daysOfData)!,
-                                                  to: todayDate)
-                
-                let x = UploadsViewController()
-                x.getHKHeartRateData(ninetyDaysAgoDate!)
-                x.getHKStepData(ninetyDaysAgoDate!)
-                x.getHKHeartRateVariabilityData(ninetyDaysAgoDate!)
-                self.retrieveSleepAnalysis(startDate: ninetyDaysAgoDate!)
-                
-                keychain.set("-10", forKey: "DaysOfData")
                 
             }
-        }//eo-request
-    }
-    
-    
+        }*/
+    }//end of requestAuthorization
+   
+  
+        
 
 
     
@@ -357,6 +366,7 @@ class RootViewController: UITabBarController {
         viewController.tabBarItem = UITabBarItem(title: viewController.title, image: UIImage(named:"symptoms"), selectedImage: UIImage(named: "symptoms-filled"))
         viewController.isSorted = false
         viewController.isGrouped = false
+        
         return viewController
     }
     
@@ -484,6 +494,7 @@ extension RootViewController: OCKSymptomTrackerViewControllerDelegate {
         // Show an `ORKTaskViewController` for the assessment's task.
         let taskViewController = ORKTaskViewController(task: sampleAssessment.task(), taskRun: nil)
         taskViewController.delegate = self
+        taskViewController.modalPresentationStyle = .fullScreen
         
         present(taskViewController, animated: true, completion: nil)
     }
@@ -710,7 +721,34 @@ extension RootViewController: ORKTaskViewControllerDelegate {
     /// Called with then user completes a presented `ORKTaskViewController`.
     func taskViewController(_ taskViewController: ORKTaskViewController, didFinishWith reason: ORKTaskViewControllerFinishReason, error: Error?) {
         
+       // get HK Data
+        var daysOfData = "-14" //self.readHeartRateData()
+        let keychain = KeychainSwift()
+        let x = UploadsViewController()
         
+        
+         if keychain.get("DaysOfData") != nil {
+             daysOfData = keychain.get("DaysOfData")!
+         }
+         
+        print("daysofdata \(String(describing: daysOfData))")
+         
+         let todayDate = Date() //
+         let calendar = Calendar.current
+         var daysAgoDate: Date?
+         daysAgoDate = calendar.date(byAdding: .day,
+                                           value: Int(daysOfData)!,
+                                           to: todayDate)
+         
+         
+//         x.getHKHeartRateData(daysAgoDate!)
+//         x.getHKStepData(daysAgoDate!)
+//         x.getHKHeartRateVariabilityData(daysAgoDate!)
+//         self.retrieveSleepAnalysis(startDate: daysAgoDate!)
+         //self.performAnchoredQueryForHeartRate()
+         keychain.set("-14", forKey: "DaysOfData")
+        
+        //
         
         
         defer {
@@ -741,9 +779,10 @@ extension RootViewController: ORKTaskViewControllerDelegate {
             let activityType = ActivityType(rawValue: event.activity.identifier),
             let sampleAssessment = sampleData.activityWithType(activityType) as? Assessment else { return }
         _ = sampleAssessment.buildResultForCarePlanEvent(event, taskResult: taskViewController.result)
-        let calendar = NSCalendar(identifier: NSCalendar.Identifier.gregorian)
+       
+        // let calendar = NSCalendar(identifier: NSCalendar.Identifier.gregorian)
         let components = event.date
-        let date = calendar?.date(from: components)
+        let date = calendar.date(from: components)
         
         var newDateString:String = ""
         newDateString = dayFormatter.string(from: date!)
@@ -756,6 +795,8 @@ extension RootViewController: ORKTaskViewControllerDelegate {
             
             //Start SymptomFocus
             if taskViewController.result.identifier == "symptomTracker" {
+                
+                
                 var dSymptomFocus:DSymptomFocus!
                 let keychain = KeychainSwift()
                 dSymptomFocus = listDataManager.createSymptomFocus(entityName: "DSymptomFocus")
@@ -938,6 +979,7 @@ extension RootViewController: ORKTaskViewControllerDelegate {
                         }
                     }
                 }
+                
                 let handle = Auth.auth().addStateDidChangeListener { (auth, user) in
                     if let user = user {
                         
@@ -997,6 +1039,7 @@ extension RootViewController: ORKTaskViewControllerDelegate {
             
             //START Appetite
             if taskViewController.result.identifier == "appetite" {
+                
                 let carePlanResult = sampleAssessment.buildResultForCarePlanEvent(event, taskResult: taskViewController.result)
                 var dAppetite: DAppetite!
                 // PARSE var dailyMeals = PFObject(className:"Meals") //Jude:Add parse
@@ -1936,7 +1979,7 @@ extension RootViewController: ORKTaskViewControllerDelegate {
         
         //private var _dGeoData:DGeoData?
         let dGeoData = listDataManager.createGeoData(entityName: "DGeoData") as DGeoData
-        let keychain = KeychainSwift()
+        //let keychain = KeychainSwift()
         if let username = keychain.get("username_TRU-BLOOD") {
             dGeoData.participantID =  username
         }
@@ -1964,7 +2007,7 @@ extension RootViewController: ORKTaskViewControllerDelegate {
             
             // Requst authorization to store the HealthKit sample.
             let healthStore = HKHealthStore()
-            healthStore.requestAuthorization(toShare: sampleTypes, read: sampleTypes, completion: { success, _ in
+            healthStore.requestAuthorization(toShare: nil, read: sampleTypes, completion: { success, _ in
                 // Check if authorization was granted.
                 if !success {
                     /*
@@ -2012,6 +2055,146 @@ extension RootViewController: ORKTaskViewControllerDelegate {
         
     }
     
+    
+    //2019-10-08
+    /*    func performAnchoredQueryForHeartRate() {
+            print("performAnchoredQueryForHeartRate()")
+                guard let heartRateType = HKObjectType.quantityType(forIdentifier: .heartRateVariabilitySDNN) else {
+                    fatalError("*** Unable to get the heart rate type ***")
+                }
+                
+                var anchor = HKQueryAnchor.init(fromValue: 0)
+                
+                if UserDefaults.standard.object(forKey: "HeartRateAnchor") != nil {
+                    let data = UserDefaults.standard.object(forKey: "HeartRateAnchor") as! Data
+                    do {
+                       anchor = try NSKeyedUnarchiver.unarchivedObject(ofClass: HKQueryAnchor.self, from: data)!
+                    } catch {
+                        print("Unable to store new anchor")
+                    }
+                    
+                    
+                }
+                
+                let query = HKAnchoredObjectQuery(type: heartRateType,
+                                                  predicate: nil,
+                                                  anchor: anchor,
+                                                  limit: HKObjectQueryNoLimit) { (query, samplesOrNil, deletedObjectsOrNil, newAnchor, errorOrNil) in
+                                                    guard let samples = samplesOrNil, let deletedObjects = deletedObjectsOrNil else {
+                                                        fatalError("*** An error occurred during the initial query: \(errorOrNil!.localizedDescription) ***")
+                                                    }
+                                                    
+                                                    anchor = newAnchor!
+                                                    do {
+                                                        let data = try NSKeyedArchiver.archivedData(withRootObject: anchor, requiringSecureCoding: true)
+                                                        UserDefaults.standard.set(data, forKey: "HeartRateAnchor")
+                                                    } catch {
+                                                        print("Unable to store new heart anchor")
+                                                    }
+                                                    
+                    
+        //    var dataDictionary = [String: Any]()
+                                                    for heartRateSample in samples {
+                                                        print("Samples: Endate Date \(heartRateSample.endDate) endDate: \(heartRateSample.startDate) \(heartRateSample.uuid) \(String(describing: heartRateSample.value(forKey: "metadata")))")
+                                                        
+                                                        //dataDictionary["hr"] = heartRateSample.
+                                                        
+                                                    }
+                    
+                                                    for deletedheartRateSample in deletedObjects {
+                                                        print("deleted: \(deletedheartRateSample)")
+                                                    }
+                                                    
+                                                    print("Heart Rate Anchor: \(anchor)")
+                }
+                
+                query.updateHandler = { (query, samplesOrNil, deletedObjectsOrNil, newAnchor, errorOrNil) in
+
+                    guard let samples = samplesOrNil, let deletedObjects = deletedObjectsOrNil else {
+                        // Handle the error here.
+                        fatalError("*** An error occurred during an update: \(errorOrNil!.localizedDescription) ***")
+                    }
+
+                    anchor = newAnchor!
+                    
+                    do {
+                        let data = try NSKeyedArchiver.archivedData(withRootObject: newAnchor as Any, requiringSecureCoding: true)
+                        UserDefaults.standard.set(data, forKey: "HeartRateAnchor")
+                        print(data.first as Any)
+                    } catch {
+                        print("Unable to store new heart anchor")
+                    }
+                    
+                    //2019-10-08
+    //                let x = UploadsViewController()
+    //                x.getAnchorHKHeartRateData(samples)
+                    
+                    for heartRateSample in samples {
+                        print("heart Samples: endDate \(heartRateSample.endDate) startDate: \(heartRateSample.startDate) uuid: \(heartRateSample.uuid) meta: \n \(String(describing: heartRateSample.value(forKey: "metadata"))) \n sampleType: \(heartRateSample.sampleType) sourceRevision: \(heartRateSample.sourceRevision) device: \(String(describing: heartRateSample.device))")
+                        let result = heartRateSample as! HKQuantitySample
+                        
+                        
+                        let heartRateBPM = result.quantity.doubleValue(for: HKUnit(from: "count/min"))
+                        let heartRateBPMUnit = "count/min"
+
+        //                let deviceUUID = heartRateSample.uuid
+                        let deviceIdentity = result.sourceRevision.source.name
+                        let deviceProductName = heartRateSample.device?.name
+                        let deviceProductType = result.sourceRevision.productType
+                        let deviceOSVersion = result.sourceRevision.version
+
+                        let startDate = heartRateSample.startDate
+                        let endDate = heartRateSample.endDate
+                        let sourceRevision = heartRateSample.sourceRevision
+                        let eventID = heartRateSample.uuid
+                        
+                        var y:[String:Any] =  [:]
+                        y["heartRateBPM"] =  heartRateBPM
+                        y["heartRateBPMUnit"] =  heartRateBPMUnit
+                        y["deviceIdentity"] =  deviceIdentity
+                        y["deviceProductName"] =  deviceProductName
+                        y["deviceProductType"] =  deviceProductType
+                        y["deviceOSVersion"] =  deviceOSVersion
+                        y["startDate"] =  startDate
+                        y["endDate"] =  endDate
+                        y["eventID"] =  eventID
+                        y["sourceID"] = sourceRevision.source.bundleIdentifier
+                        
+                        print("dataDictionary y:\n \(y) \n \n")
+                        let handle = Auth.auth().addStateDidChangeListener { (auth, user) in
+                            if let user = user {
+                                print("theUser \(user)")
+                                let uid = user.uid
+                                let email = user.email
+                                //let photoURL = user.photoURL
+
+                                y["userID"] = uid
+                                y["userEmail"] = email
+                                y["appMode"] = self.appMode(email: email!)
+                                y["author_id"] = uid
+                                
+                                var ref: DocumentReference? = nil
+                                ref = self.db.collection("heart_rates").addDocument(data: y) { err in
+                                    if let err = err {
+                                        print("Error adding document: \(err)")
+                                    } else {
+                                        print("Document added with ID: \(ref!.documentID)")
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+
+                    for deletedheartRateSample in deletedObjects {
+                        print("deleted: \(deletedheartRateSample)")
+                    }
+                }
+                
+                healthStore.execute(query)
+            }*/
+            
+    
     // MARK: Convenience
     
     fileprivate func completeEvent(_ event: OCKCarePlanEvent, inStore store: OCKCarePlanStore, withResult result: OCKCarePlanEventResult) {
@@ -2021,7 +2204,21 @@ extension RootViewController: ORKTaskViewControllerDelegate {
             }
         }
     }
+    
+    
+    
+    
+    
+    
 }
+// MARK: END Of RootViewController Class
+
+
+
+
+
+
+
 
 // MARK: OCKConnectViewControllerDelegate
 // MARK: CarePlanStoreManagerDelegate

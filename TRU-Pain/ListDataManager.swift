@@ -16,22 +16,24 @@ final class ListDataManager {
     
     func getArrayFor(string:String) -> Array<String> {
         print("string passed to func \(string)")
+        var sortedArray = [String]()
         let keychain = KeychainSwift()
         let listOfCSV = keychain.get(string)
         var array = [String]()
-        var sortedArray = [String]()
-        let tempArray = listOfCSV!.components(separatedBy: ",")
-        for item in tempArray {
-            let rawString:String = String.localizedStringWithFormat("%@", item)
-            let trimmedString:String = rawString.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-            array.append(trimmedString)
-        }
-        if (string != "Body Locations") {
-            sortedArray = array.sorted()
-        } else {
-            sortedArray = array
-        }
         
+        
+        if let tempArray = listOfCSV?.components(separatedBy: ",") {
+            for item in tempArray {
+                let rawString:String = String.localizedStringWithFormat("%@", item)
+                let trimmedString:String = rawString.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+                array.append(trimmedString)
+            }
+            if (string != "Body Locations") {
+                sortedArray = array.sorted()
+            } else {
+                sortedArray = array
+            }
+        }
         
         return sortedArray
     }

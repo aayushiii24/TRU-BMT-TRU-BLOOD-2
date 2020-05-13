@@ -135,18 +135,15 @@ static NSString * const kwShareFileNameDailySleepAnalysis = @"sleepAnalysis.csv"
                 //   NSLog(@"if (results.count > 0) -- >>>> %lu", results.count);
                 //                self.progressView.progress = 0.0;
                 //                [self.activityIndicator setHidden:YES];
-                
-                
                 for (HKQuantitySample *sample in results) {
                     double heartRate = [sample.quantity doubleValueForUnit:[[HKUnit countUnit] unitDividedByUnit:[HKUnit minuteUnit]]];
                     NSString *heartRateString = [NSString stringWithFormat:@"%.f",heartRate];
                     //[arrayHeartRate addObject:[NSNumber numberWithDouble:hbpm]];
-                    NSLog(@"Successfully got heart rate %0.f", heartRate);
+                    NSLog(@"Successfully got heart rate %f", heartRate);
                     NSLog(@"heart rate sample metadata \n %@", sample);
                     
                     //                    NSString *HKDevicePropertyKeyFirmwareVersion = HKDevicePropertyKeyFirmwareVersion;
                     NSLog(@"ambientTemp_C: %@,%@, %0.f ,%@, %@, %@, %@, %@", [sample.metadata objectForKey:@"ambientTemp_C"], sample.startDate,heartRate, sample.UUID.UUIDString, [sample.metadata objectForKey:@"HKDeviceName"],[sample.metadata objectForKey:@"deviceConnection"], [sample.metadata objectForKey:@"RRIntervalData"], [sample.metadata objectForKey:@"bandDistanceToday_km"]);
-                    
                     
                     NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
                     dateFormatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZ";
@@ -161,7 +158,6 @@ static NSString * const kwShareFileNameDailySleepAnalysis = @"sleepAnalysis.csv"
                     NSString *sampleDeviceHardwareVersion = (sample.device.hardwareVersion ? sample.device.hardwareVersion: @"-99");
                     NSString *sampleDeviceModel = (sample.device.model ? sample.device.model: @"-99");
                     NSString *sampleUUID = (sample.UUID.UUIDString ? sample.UUID.UUIDString: @"-99");
-
                     
                     NSCharacterSet *charactersToRemove =
                     [[ NSCharacterSet alphanumericCharacterSet ] invertedSet ];
@@ -196,7 +192,7 @@ static NSString * const kwShareFileNameDailySleepAnalysis = @"sleepAnalysis.csv"
                                     sampleUUID,
                                     sampleSourceRevisionDescription
                                     //
-                                    ];
+                    ];
                     [archive addObject:ar];
                     
                 }
@@ -278,9 +274,9 @@ static NSString * const kwShareFileNameDailySleepAnalysis = @"sleepAnalysis.csv"
                     
                     
                 }
-            }
-        }
-    }];
+            } //if (archiveArray.count >0) {
+        } //else
+    }]; //HKSampleQuery *quer
     
     // TODO: execute the query
     
@@ -369,7 +365,7 @@ static NSString * const kwShareFileNameDailySleepAnalysis = @"sleepAnalysis.csv"
                     double heartRateVariability = [sample.quantity doubleValueForUnit:[HKUnit secondUnit]];
                     NSString *heartRateString = [NSString stringWithFormat:@"%.3f",heartRateVariability*1000];
                     //[arrayHeartRate addObject:[NSNumber numberWithDouble:hbpm]];
-                    NSLog(@"Successfully got heart rate %0.f", heartRateVariability);
+                    NSLog(@"Successfully got heart rate %f", heartRateVariability);
                     NSLog(@"heart rate sample metadata \n %@", sample);
                     
                     //                    NSString *HKDevicePropertyKeyFirmwareVersion = HKDevicePropertyKeyFirmwareVersion;
@@ -826,8 +822,8 @@ static NSString * const kwShareFileNameDailySleepAnalysis = @"sleepAnalysis.csv"
                                                                        authenticationMethod:NSURLAuthenticationMethodDefault];
     
     
-    NSString *username = [SAMKeychain passwordForService:@"comSicklesoftTRUBMT" account:@"username"];
-    NSString *password = [SAMKeychain passwordForService:@"comSicklesoftTRUBMT" account:username];
+    NSString *username = [SAMKeychain passwordForService:@"comSicklesoftTRUBMT" account:@"username_TRU-BLOOD"];
+    NSString *password = [SAMKeychain passwordForService:@"comSicklesoftTRUBMT" account:@"password_TRU-BLOOD"];
     NSURLCredential *userCredential = [NSURLCredential credentialWithUser:username password:password persistence:NSURLCredentialPersistencePermanent];
     [[NSURLCredentialStorage sharedCredentialStorage] setDefaultCredential:userCredential
                                                         forProtectionSpace:loginProtectionSpace];
@@ -885,7 +881,7 @@ static NSString * const kwShareFileNameDailySleepAnalysis = @"sleepAnalysis.csv"
 
 -(NSString *)participant {
     
-    NSString *participant = [SAMKeychain passwordForService:@"comSicklesoftTRUBMT" account:@"username"];
+    NSString *participant = [SAMKeychain passwordForService:@"comSicklesoftTRUBMT" account:@"username_TRU-BLOOD"];
     NSLog(@"participant  %@",participant);
     
     return participant;
@@ -922,7 +918,7 @@ static NSString * const kwShareFileNameDailySleepAnalysis = @"sleepAnalysis.csv"
 -(NSString *)userName {
     
     
-    NSString *username = [SAMKeychain passwordForService:@"comSicklesoftTRUBMT" account:@"username"];
+    NSString *username = [SAMKeychain passwordForService:@"comSicklesoftTRUBMT" account:@"username_TRU-BLOOD"];
     NSLog(@"user  %@",username);
     
     return username;
@@ -931,10 +927,169 @@ static NSString * const kwShareFileNameDailySleepAnalysis = @"sleepAnalysis.csv"
 -(NSString *)passWord {
     
     
-    NSString *myPassword = [SAMKeychain passwordForService:@"comSicklesoftTRUBMT" account:[self userName]];
+    NSString *myPassword = [SAMKeychain passwordForService:@"comSicklesoftTRUBMT" account:@"password_TRU-BLOOD"];
     //NSLog(@"myPassword %@",myPassword);
 //    /comSicklesoftTRUBMT
     return myPassword;
 }
+
+
+
+
+
+//2019-10-08
+-(void) getAnchorHKHeartRateData:(NSArray *)results {
+    NSLog(@"here are the results from root: %@", results);
+    self.healthstore = [[HKHealthStore alloc] init];
+     
+    NSMutableArray * archive = [[NSMutableArray alloc] initWithCapacity:1] ; //we will store each array in the archive mutable array
+            if (results.count > 0) {
+                //   NSLog(@"if (results.count > 0) -- >>>> %lu", results.count);
+                for (HKQuantitySample *sample in results) {
+                    double heartRate = [sample.quantity doubleValueForUnit:[[HKUnit countUnit] unitDividedByUnit:[HKUnit minuteUnit]]];
+                    NSString *heartRateString = [NSString stringWithFormat:@"%.f",heartRate];
+                    //[arrayHeartRate addObject:[NSNumber numberWithDouble:hbpm]];
+                    NSLog(@"Successfully got heart rate %@", heartRate);
+                    NSLog(@"heart rate sample metadata \n %@", sample);
+                    
+                    //                    NSString *HKDevicePropertyKeyFirmwareVersion = HKDevicePropertyKeyFirmwareVersion;
+                    NSLog(@"ambientTemp_C: %@,%@, %0.f ,%@, %@, %@, %@, %@", [sample.metadata objectForKey:@"ambientTemp_C"], sample.startDate,heartRate, sample.UUID.UUIDString, [sample.metadata objectForKey:@"HKDeviceName"],[sample.metadata objectForKey:@"deviceConnection"], [sample.metadata objectForKey:@"RRIntervalData"], [sample.metadata objectForKey:@"bandDistanceToday_km"]);
+                    
+                    NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
+                    dateFormatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZ";
+                    NSString * sampleStartDateString = [dateFormatter stringFromDate:sample.startDate];
+                    
+                    //        NSString * deviceName = ([sample.metadata objectForKey:@"HKDeviceName"] ? [sample.metadata objectForKey:@"HKDeviceName"]: @"-99");
+                    NSString * deviceName = ([[UIDevice currentDevice] name] ? [[UIDevice currentDevice] name]: @"-99");
+                    NSString * userName = ([self userName] ? [self userName]: @"-99");
+                    NSString * sampleSource = (sample.sourceRevision.source.name ? sample.sourceRevision.source.name: @"-99");
+                    NSString *sampleRevisionSourceDescription = (sample.sourceRevision.source.description ? sample.sourceRevision.source.description: @"-99");
+                    NSString *sampleDeviceName = (sample.device.name ? sample.device.name: @"-99");
+                    NSString *sampleDeviceHardwareVersion = (sample.device.hardwareVersion ? sample.device.hardwareVersion: @"-99");
+                    NSString *sampleDeviceModel = (sample.device.model ? sample.device.model: @"-99");
+                    NSString *sampleUUID = (sample.UUID.UUIDString ? sample.UUID.UUIDString: @"-99");
+                    
+                    NSCharacterSet *charactersToRemove =
+                    [[ NSCharacterSet alphanumericCharacterSet ] invertedSet ];
+                    
+                    NSString *trimmedReplacementDevicename =
+                    [[deviceName componentsSeparatedByCharactersInSet:charactersToRemove]
+                     componentsJoinedByString:@""];
+                    
+                    NSString *trimmedReplacementUserName =
+                    [[userName componentsSeparatedByCharactersInSet:charactersToRemove]
+                     componentsJoinedByString:@""];
+                    
+                    NSString *trimmedReplacementSampleSource =
+                    [[sampleSource componentsSeparatedByCharactersInSet:charactersToRemove]
+                     componentsJoinedByString:@""];
+                    
+                    NSString *sampleSourceRevisionDescription =
+                    [[sampleRevisionSourceDescription componentsSeparatedByCharactersInSet:charactersToRemove]
+                     componentsJoinedByString:@""];
+                    
+                    NSLog(@" clean name %@, ugly name %@",trimmedReplacementDevicename, deviceName);
+                    NSLog(@" clean name %@, ugly name %@",trimmedReplacementUserName, userName);
+                    
+                    NSArray *ar = @[trimmedReplacementDevicename,
+                                    trimmedReplacementUserName,
+                                    sampleStartDateString,
+                                    trimmedReplacementSampleSource,
+                                    heartRateString,
+                                    sampleDeviceName,
+                                    sampleDeviceHardwareVersion,
+                                    sampleDeviceModel,
+                                    sampleUUID,
+                                    sampleSourceRevisionDescription
+                                    //
+                    ];
+                    [archive addObject:ar];
+                    
+                }
+                
+                NSArray *arHeader = @[@"deviceName",
+                                      @"user",
+                                      @"sampleStartDate",
+                                      @"sampleSource",
+                                      @"heartRate",
+                                      @"sampleDeviceName",
+                                      @"sampleDeviceHardwareVersion",
+                                      @"sampleDeviceModel",
+                                      @"sampleUUID",
+                                      @"sampleSourceRevisionDescription"
+                                      ];
+                
+                //"Weather: Partly Cloudy, temp 94 \U1d52F, feels like 104 \U1d52F, cloud 25%, humidity 50%, pressure 1015, ozone 291, wind speed 2 mph, and altitude 105 m"
+                
+                [archive insertObject:arHeader atIndex:0];
+                self.session = [self session];
+                NSArray *archiveArray = [archive copy];
+                if (archiveArray.count >0) {
+                    
+                    NSFileManager *fileManager = [[NSFileManager alloc]     init];
+                    NSString *tempDocumentDirectory= NSTemporaryDirectory();
+                    NSString *filePath = [tempDocumentDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"heartRate-row-%d.csv",arc4random() % 1000]];
+                    
+                    NSOutputStream *output = [NSOutputStream outputStreamToFileAtPath:filePath append:NO];
+                    CHCSVWriter *writer = [[CHCSVWriter alloc] initWithOutputStream:output encoding:NSUTF8StringEncoding delimiter:','];
+                    
+                    for (NSArray *line in archiveArray) {
+                        [writer writeLineOfFields:line];
+                        if (line) {
+                            NSLog(@"CSV line %@", line.description);
+                            NSLog(@"CSV line description!");
+//                            dispatch_async(dispatch_get_main_queue(), ^{
+//                                [self.progressView setHidden:YES];
+//                                [self.activityIndicator setHidden:NO];
+//                                [self.activityIndicator startAnimating];
+//                            });
+                        }
+                    }
+                    NSLog(@"ArchiveArray: %@", archiveArray);
+                    
+                    [writer closeStream];
+                    
+                    NSData *data = [NSData dataWithContentsOfFile:filePath];
+                    
+                    if (filePath != nil){
+                        self.url = [NSURL fileURLWithPath:filePath];
+                        //            NSDictionary *fileAttributes = @{
+                        //                                             NSFileProtectionKey : NSFileProtectionComplete
+                        //                                             };
+                        BOOL wrote = [fileManager createFileAtPath:filePath
+                                                          contents:data
+                                                        attributes:nil];
+                        if (wrote){
+                            
+                            if (_url){
+                                NSLog(@"upload from HERE   url path  %@", _url);
+                                 [self doUploadCSVWithName:_url fileName:@"heartRate.csv"];
+                                dispatch_async(dispatch_get_main_queue(), ^{
+//                                    [self.progressView setHidden:NO];
+//                                    [self.progressView setProgress:0.0];
+                                   
+                                    //[self getHKDataRestingHeartRate:startDate endDate:endDate];
+                                    //[self getHKDataWalkingHeartRateAverage:startDate endDate:endDate];
+                                    //[self getHKDataHeartRateVariability:startDate endDate:endDate];
+                                    
+                                });
+                                //This is use to upload data fro specific dates
+                                // [self upload:_url fileName:kwShareFileNameDaily];
+                                
+                            }
+                            
+                        }
+                        
+                    }
+                    
+                    
+                }
+            } //if (archiveArray.count >0) {
+    
+
+    
+
+}
+
 
 @end

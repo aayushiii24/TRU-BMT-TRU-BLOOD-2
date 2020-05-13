@@ -23,7 +23,7 @@ class HKClient : NSObject {
     
     var isSharingEnabled: Bool = false
     let healthKitStore:HKHealthStore? = HKHealthStore()
-    let glucoseType : HKObjectType = HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.heartRate)!
+    let glucoseType : HKObjectType = HKObjectType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bloodGlucose)!
     
     override init(){
         super.init()

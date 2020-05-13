@@ -15,6 +15,8 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) getHKHeartRateData:(NSDate *)pickerDate;
 -(void) getHKHeartRateVariabilityData:(NSDate *)pickerDate;
 -(void) getHKStepData:(NSDate *)pickerDate;
+-(void) getAnchorHKHeartRateData:(NSArray *)results;//2019-10-08
+
 //-(void) getHKActivityData:(NSDate *)pickerDate;
 -(NSString *)userName;
 -(void) getHKActivityData:(NSDate *)pickerDate  activityArray:(NSArray *)activityArray sharefileName:(NSString *)sharefileName;
