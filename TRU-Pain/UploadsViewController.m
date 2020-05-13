@@ -279,7 +279,6 @@ static NSString * const kwShareFileNameDailySleepAnalysis = @"sleepAnalysis.csv"
     }]; //HKSampleQuery *quer
     
     // TODO: execute the query
-    
     [self.healthstore executeQuery:query];
 }
 

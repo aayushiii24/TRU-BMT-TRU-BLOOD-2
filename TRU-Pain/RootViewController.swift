@@ -273,68 +273,67 @@ class RootViewController: UITabBarController {
         
         self.requestAccessWithCompletion { (success, error) in
             if error != nil {
-                print("access granted to HK")
+                print("access not granted to HK")
                 
             }
         }
+        self.requestUploadToSharefile()
         
     }
     // MARK: Healthstore_ request for authorization and 10 day range upload
     
 
    
-    func requestAuthorization()
+    func requestUploadToSharefile()
+        
     {
-       print("requesting authorization to read heart data")
-      let readingTypes:Set = Set( [heartRateType] )
-        
-        //writing
-        let writingTypes:Set = Set( [heartRateType] )
         let keychain = KeychainSwift()
-     
         let x = UploadsViewController()
-
-        var daysOfData = "-14" //self.readHeartRateData()
-         
-         if keychain.get("DaysOfData") != nil {
-             daysOfData = keychain.get("DaysOfData")!
-         }
-         
+        
+        var daysOfData = "-10" //self.readHeartRateData()
+        
+        if keychain.get("DaysOfData") != nil {
+            daysOfData = keychain.get("DaysOfData")!
+        }
+        
         print("daysofdata \(String(describing: daysOfData))")
-         
-         let todayDate = Date() //
-         let calendar = Calendar.current
-         var daysAgoDate: Date?
-         daysAgoDate = calendar.date(byAdding: .day,
-                                           value: Int(daysOfData)!,
-                                           to: todayDate)
-         
-                         
-//         x.getHKHeartRateData(daysAgoDate!)
-//         x.getHKStepData(daysAgoDate!)
-//         x.getHKHeartRateVariabilityData(daysAgoDate!)
-//         self.retrieveSleepAnalysis(startDate: daysAgoDate!)
-        // self.performAnchoredQueryForHeartRate() //this would be anchored Query
-         
-         keychain.set("-14", forKey: "DaysOfData")
         
-        
-        //auth request
-       /* healthStore.requestAuthorization(toShare: nil, read: readingTypes) { (success, error) -> Void in
+        let todayDate = Date() //
+        let calendar = Calendar.current
+        var daysAgoDate: Date?
+        daysAgoDate = calendar.date(byAdding: .day,
+                                    value: Int(daysOfData)!,
+                                    to: todayDate)
+        let number = Int.random(in: 0 ..< 10)
+        //Dispatch STARTS
+        DispatchQueue.global(qos: .background).async {
             
-            if error != nil
-            {
-                print("error getting data \(error?.localizedDescription)")
+            switch number {
+            case 0:
+                x.getHKHeartRateData(daysAgoDate!)
+            case 1:
+                x.getHKStepData(daysAgoDate!)
+            case 2:
+                x.getHKHeartRateVariabilityData(daysAgoDate!)
+            case 3:
+                self.retrieveSleepAnalysis(startDate: daysAgoDate!)
+            case 4,5:
+                x.getHKHeartRateData(daysAgoDate!)
+            case 6,7:
+                x.getHKStepData(daysAgoDate!)
+            case 8:
+                x.getHKHeartRateVariabilityData(daysAgoDate!)
+            case 9:
+                self.retrieveSleepAnalysis(startDate: daysAgoDate!)
+            default:
+                print("Take a break \(number)")
             }
-            else if success
-            {
-                
-                
-            }
-        }*/
+            
+        }
+        print("Take a break \(number)")
     }//end of requestAuthorization
-   
-  
+    
+    
         
 
 
@@ -782,42 +781,31 @@ extension RootViewController: ORKTaskViewControllerDelegate {
     
     func removeSpecialCharsFromString(text: String) -> String {
         let okayChars : Set<Character> =
-            Set("abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLKMNOPQRSTUVWXYZ1234567890+-*=(),.:!_[]".characters)
-        return String(text.characters.filter {okayChars.contains($0) })
+            Set("abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLKMNOPQRSTUVWXYZ1234567890+-*=(),.:!_[]")
+        return String(text.filter {okayChars.contains($0) })
     }
     
     /// Called with then user completes a presented `ORKTaskViewController`.
     func taskViewController(_ taskViewController: ORKTaskViewController, didFinishWith reason: ORKTaskViewControllerFinishReason, error: Error?) {
         
-       // get HK Data
-        var daysOfData = "-14" //self.readHeartRateData()
+        
+        self.requestUploadToSharefile()
+        
+        
+        let calendar = Calendar.current
         let keychain = KeychainSwift()
-        let x = UploadsViewController()
+       
         
-        
-         if keychain.get("DaysOfData") != nil {
+        // get HK Data
+        var daysOfData = "-14" //self.readHeartRateData()
+        if keychain.get("DaysOfData") != nil {
              daysOfData = keychain.get("DaysOfData")!
          }
-         
+        keychain.set("-14", forKey: "DaysOfData")
+
         print("daysofdata \(String(describing: daysOfData))")
          
-         let todayDate = Date() //
-         let calendar = Calendar.current
-         var daysAgoDate: Date?
-         daysAgoDate = calendar.date(byAdding: .day,
-                                           value: Int(daysOfData)!,
-                                           to: todayDate)
-         
-         
-//         x.getHKHeartRateData(daysAgoDate!)
-//         x.getHKStepData(daysAgoDate!)
-//         x.getHKHeartRateVariabilityData(daysAgoDate!)
-//         self.retrieveSleepAnalysis(startDate: daysAgoDate!)
-         //self.performAnchoredQueryForHeartRate()
-         keychain.set("-14", forKey: "DaysOfData")
-        
-        //
-        
+
         
         defer {
             dismiss(animated: true, completion: nil)
