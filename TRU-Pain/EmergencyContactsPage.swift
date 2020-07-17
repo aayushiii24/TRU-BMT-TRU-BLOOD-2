@@ -72,7 +72,7 @@ class SampleData: NSObject {
                    name: "Medical Emergency",
                    relation: "call 911",
                    contactInfoItems:[.phone("911")],
-                   tintColor: Colors.red.color,
+                   tintColor: Colors.navyBlueTeal.color,
                    monogram: "ER",
                    image: UIImage(named: "ER.jpg")),
         
@@ -80,7 +80,7 @@ class SampleData: NSObject {
                    name: "Hilary Miller",
                    relation: "Study Coordinator",
                    contactInfoItems:[.phone("919-668-7238"), .email("hilary.miller299@duke.edu")],
-                   tintColor: Colors.blue.color,
+                   tintColor: Colors.navyBlueTeal.color,
                    monogram: "SC",
                    image: UIImage(named: "studyCoordinator.png")),
         
@@ -88,7 +88,7 @@ class SampleData: NSObject {
                    name: "ABMT",
                    relation: "Clinic (M-F 8-6 and S/S 8-4). Ask for the Charge Nurse for transplant-related question.",
                    contactInfoItems:[.phone("919-668-6547"), .phone("919-668-6548")],
-                   tintColor: Colors.orangeRed.color,
+                   tintColor: Colors.navyBlueTeal.color,
                    monogram: nil,
                    image: UIImage(named: "ABMTclinic.png")),
         
@@ -96,7 +96,7 @@ class SampleData: NSObject {
                    name: "9200", //Changed to 9200 4/18/23
                    relation: "Inpatient Unit (Open 24/7). Ask for the Charge Nurse for transplant-related question.",
                    contactInfoItems:[.phone("919-681-9241")],
-                   tintColor: Colors.green.color,
+                   tintColor: Colors.navyBlueTeal.color,
                    monogram: nil,
                    image: UIImage(named: "patientCareUnit.jpg"))
     ]

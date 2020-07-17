@@ -26,7 +26,7 @@ struct SymptomTracker: Assessment {
         // Get the localized strings to use for the assessment.
         let title = NSLocalizedString("Symptoms" , comment: "")
         let summary = NSLocalizedString("Tracker", comment: "")
-        let activity = OCKCarePlanActivity.assessment(withIdentifier: activityType.rawValue, groupIdentifier: nil, title: title, text: summary, tintColor: Colors.green.color, resultResettable: true, schedule: schedule,
+        let activity = OCKCarePlanActivity.assessment(withIdentifier: activityType.rawValue, groupIdentifier: nil, title: title, text: summary, tintColor: Colors.mediumBlue.color, resultResettable: true, schedule: schedule,
                                                       userInfo: nil,
                                                       optional: false
         )
@@ -46,7 +46,7 @@ struct SymptomTracker: Assessment {
         step.isOptional = false
         
         //SYMPTOM NAME
-        let symptomArray: Array = manager.getArrayFor(string: "Symptoms")
+        let symptomArray: Array = ["Fever", "Pain", "Headache", "Cold symptoms", "Nausea", "Vomiting", "Constipation", "Diarrhea", "Fatigue", "Neuropathy", "Shortness of Breath (difficulty breathing)", "Trouble urinating", "Blood in urine"," Blood in stool", "Blood in vomit", "Bleeding"] //manager.getArrayFor(string: "Symptoms")
         var choices:[ORKTextChoice] = []
         for item in symptomArray {
             let textString = item
@@ -94,7 +94,7 @@ struct SymptomTracker: Assessment {
         
         //INTERVENTIONS ////////// ////////// ////////// ////////// ////////// //////////
         let formInterventionSection = ORKFormItem(sectionTitle: " ") ////////// SECTION
-        let interventionArray: Array = manager.getArrayFor(string: "Interventions")
+        let interventionArray: Array = ["Deep breathing/used distraction/used relaxation", "Took medication"]//manager.getArrayFor(string: "Interventions")
         var interventionChoices:[ORKTextChoice] = []
         for item in interventionArray {
             let textString = item
@@ -123,7 +123,7 @@ struct SymptomTracker: Assessment {
         //should make a function that returns the date for the pickerInitialDate
         let dateKey = Key<String>("CurrentDateForDatePicker")
         let x = ddefaults.get(for: dateKey)
-        print("here is the date I want \(String(describing: x))")
+        print("here is the date I need \(String(describing: x))")
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat =  "MMM d, yyyy, HH:mm"

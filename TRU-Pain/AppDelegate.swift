@@ -347,11 +347,11 @@ extension AppDelegate {
         print("nothing")
         
         //UI Color scheme
-        UINavigationBar.appearance().tintColor = Colors.careKitRed.color
-        UITabBar.appearance().tintColor = Colors.careKitRed.color
-        UITabBarItem.appearance().setTitleTextAttributes(convertToOptionalNSAttributedStringKeyDictionary([convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor): Colors.careKitRed.color]), for:.selected)
-        UITabBarItem.appearance().setTitleTextAttributes(convertToOptionalNSAttributedStringKeyDictionary([convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor): Colors.careKitRed.color]), for:.normal)
-        UITableViewCell.appearance().tintColor = Colors.careKitRed.color
+        UINavigationBar.appearance().tintColor = Colors.mintBlue.color
+        UITabBar.appearance().tintColor = Colors.mintBlue.color
+        UITabBarItem.appearance().setTitleTextAttributes(convertToOptionalNSAttributedStringKeyDictionary([convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor): Colors.mintBlue.color]), for:.selected)
+        UITabBarItem.appearance().setTitleTextAttributes(convertToOptionalNSAttributedStringKeyDictionary([convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor): Colors.mintBlue.color]), for:.normal)
+        UITableViewCell.appearance().tintColor = Colors.mintBlue.color
     }
 }
 

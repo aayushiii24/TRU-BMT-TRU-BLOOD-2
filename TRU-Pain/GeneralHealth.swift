@@ -27,7 +27,7 @@ struct GeneralHealth: Assessment {
         let title = NSLocalizedString("General Health" , comment: "")
         let summary = NSLocalizedString("Today", comment: "")
         
-        let activity = OCKCarePlanActivity.assessment(withIdentifier: activityType.rawValue, groupIdentifier: nil, title: title, text: summary, tintColor: Colors.green.color, resultResettable: true, schedule: schedule, userInfo: nil, optional: false)
+        let activity = OCKCarePlanActivity.assessment(withIdentifier: activityType.rawValue, groupIdentifier: nil, title: title, text: summary, tintColor: Colors.mediumBlue.color, resultResettable: true, schedule: schedule, userInfo: nil, optional: false)
         
         return activity
     }
@@ -114,8 +114,13 @@ struct GeneralHealth: Assessment {
                                                            vertical: false,
                                                            maximumValueDescription: NSLocalizedString("", comment: ""),
                                                            minimumValueDescription: NSLocalizedString("", comment: ""))
-        let formItemSleepHours = ORKFormItem(identifier:"SleepHoursItem", text: NSLocalizedString("6. How many hours of sleep did you get last night?", comment: ""), answerFormat: sleepHoursScaleAnswerFormat)
+        let formItemSleepHours = ORKFormItem(identifier:"SleepHoursItem", text: NSLocalizedString("6. How many hours of sleep did you get yesterday (overnight + naps)", comment: ""), answerFormat: sleepHoursScaleAnswerFormat)
         formItemSleepHours.isOptional = false
+        
+        let formItemTextInterventions = NSLocalizedString("", comment: "")
+        let formItemOtherInterventions = ORKFormItem(identifier: "general_health_notes", text: formItemTextInterventions, answerFormat: ORKAnswerFormat.textAnswerFormat(withMaximumLength: 120))
+        formItemOtherInterventions.placeholder = NSLocalizedString("4. Tap to add any notes", comment: "")
+        formItemOtherInterventions.isOptional = true
         
         step.formItems = [
             

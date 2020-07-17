@@ -38,19 +38,6 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        //TESTING CODE
-        /*let manager = ListDataManager()
-         let previousSymtoms = manager.findTodaySymptomFocus(date: "2018JUN21")
-         let symptoms = manager.findSymptomFocus(entityName: "DSymptomFocus") as [DSymptomFocus]
-         print("Symptom- previous \(symptoms) anything")
-         for item in symptoms {
-         print("Symptom- date \(item.dateString) anything")
-         print("Symptom- name \(item.name) anything")
-         }*/
-        //END: TESTING
-        
-        //self.docRef = Firestore.firestore().document("friends/profile")
-        
         
         let standardDefaults = UserDefaults.standard
         if standardDefaults.object(forKey: "ORKSampleFirstRun") as! String == "ORKSampleFirstRun" {
@@ -87,8 +74,6 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
             
         }
         
-        
-        
         //        Auth.auth().createUser(withEmail: "sicklecell@me.com", password: "Welcome8_") { (user, error) in
         //            // ...
         //        }
@@ -96,16 +81,13 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
         //        GIDSignIn.sharedInstance().uiDelegate = self as! GIDSignInUIDelegate
         //        GIDSignIn.sharedInstance().signIn()
         
-        
-        
-        
-        // [START get_iid_token]
-        let token = InstanceID.instanceID().token()
-        print(token ?? "TOKEN -999")
-        // [END get_iid_token]
-        
-        Messaging.messaging().subscribe(toTopic: "/topics/news")
-        print("Subscribed to news topic")
+//        // [START get_iid_token]
+//        let token = InstanceID.instanceID().token()
+//        print(token ?? "TOKEN -999")
+//        // [END get_iid_token]
+//
+//        Messaging.messaging().subscribe(toTopic: "/topics/news")
+//        print("Subscribed to news topic")
         
         
     }
@@ -215,15 +197,15 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
         
         alert.addTextField { (textField) in
             textField.keyboardType = .emailAddress
-            textField.placeholder = "email"
-            //textField.text = "scdi@icloud.com"
+           // textField.placeholder = "email"
+            //textField.text = "appleuser@icloud.com"
         }
         
         alert.addTextField { (textField) in
             textField.keyboardType = .default
             textField.isSecureTextEntry = true
-            textField.placeholder = "password"
-            //textField.text = "Welcome8_"
+            //textField.placeholder = "password"
+            //textField.text = "Welcome11_"
         }
         
         //trupain@icloud.com 7YmKnV2oa5UCc3wFJN40MCozXwx2
@@ -263,24 +245,37 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
         //Ensure that user has download access to the profile
         //If register button is used esure that the database for CareKit is cleared to be reprogrammed
         //Should a dump upload of current data occur in the background prior to wiping out CareKit
-        Alamofire.request("https://scdi.sharefile-webdav.com:443/Dev/SMARTa/\(user!)/Preferences/preference.json")
-            .authenticate(usingCredential: credential)
-            .responseString { response in
+       print("start here")
+        let request = AF.request("https://scdi.sharefile-webdav.com:443/TRU-BMT/preference.json")
+        .authenticate(with: credential)
+        request.response { (response) in
+            guard String(describing: response.result).lowercased().range(of:"failure") == nil else {
+                print("registration failed")
+                self.registrationFailed()
+                return
+            }
+            
+            print("did we get any data \(String(describing: response.result))")
+        }
+        
+      AF.request("https://scdi.sharefile-webdav.com:443/Dev/SMARTa/\(user!)/Preferences/preference.json")
+            .authenticate(with: credential)
+            .responseJSON { response in
                 print("https://scdi.sharefile-webdav.com:443/Dev/SMARTa/\(user!)/Preferences/preference.json")
                 print("-debugPrint(response.result)")
-                debugPrint(response.result.isSuccess)
+                //debugPrint(response.result.isSuccess)
                 debugPrint(response.result)
                 
                 print("debugPrint(response.result.value)")
-                debugPrint(response.result.value as Any)
+               // debugPrint(response.result.value as Any)
                 print("debugPrint(response.data)")
                 debugPrint(response.data ?? "no data")
                 
-                guard response.result.isSuccess else {
-                    print("registration failed")
-                    self.registrationFailed()
-                    return
-                }
+//                guard response.result.isSuccess else {
+//                    print("registration failed")
+//                    self.registrationFailed()
+//                    return
+//                }
                 
                 print("Yeah, response not nil")
                 
@@ -295,9 +290,9 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
                 
                 keychain.set(user!, forKey: "username_TRU-BLOOD", withAccess: .accessibleWhenUnlocked)
                 keychain.set(password!, forKey: "password_TRU-BLOOD", withAccess: .accessibleWhenUnlocked)
-                if let dict = response.result.value as? JSONStandard {
+                if let dict = response as? JSONStandard {
                     for (key,value) in dict {
-                        print("\(key) = \(value)")
+                        print("key: \(key) = \(value)")
                         keychain.set(value as! String, forKey: key, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
                         SAMKeychain.setPassword(value as! String, forService: "comSicklesoftTRUBMT", account:key)
                         
@@ -318,18 +313,27 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
                     }
                 }
                 
-                keychain.set(user!, forKey: "Email")
+        
+        
+               // keychain.set(user!, forKey: "Email")
                 SAMKeychain.setPassword(user!, forService: "comSicklesoftTRUBMT", account: "username_TRU-BLOOD")
                 SAMKeychain.setPassword(password!, forService: "comSicklesoftTRUBMT", account: "password_TRU-BLOOD")
                 standardDefaults.setValue("Done", forKey: "ORKSampleFirstRun")
                 print("username and password : \(String(describing: user)) : \(String(describing: password))")
                 
+                
+                
+                
                 Auth.auth().createUser(withEmail: user!, password: password!) { (user, error) in
                     // ...
                     print(" user and error \(String(describing: user)) and \(String(describing: error))")
                 }
+                
+                
         }
+   
     }
+    
     
     //FIREBASE//
     func firebaseUserLogin(user:String, password:String)  {
@@ -485,26 +489,26 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
                     settings.isPersistenceEnabled = true
                     
                 }
-                Alamofire.request("https://scdi.sharefile-webdav.com:443/Dev/SMARTa/\(user)/Preferences/preference.json")
-                    .authenticate(usingCredential: credential)
+                AF.request("https://scdi.sharefile-webdav.com:443/Dev/SMARTa/\(user)/Preferences/preference.json")
+                    .authenticate(with: credential)
                     .responseJSON { response in
                         
                         print("https://scdi.sharefile-webdav.com:443/Dev/SMARTa/\(user)/Preferences/preference.json")
                         print("-debugPrint(response.result)")
                         debugPrint(response.result)
                         print("-debugPrint(response.result.value)")
-                        debugPrint(response.result.value as Any)
+                        debugPrint(response as Any)
                         print("-debugPrint(response.data)")
                         debugPrint(response.data ?? "no data")
 
                         let keychain = KeychainSwift()
-                        if let dict = response.result.value as? JSONStandard {
-                            for (key,value) in dict {
-                                print("\(key) = \(value)")
-                                keychain.set(value as! String, forKey: key, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
-                                //SAMKeychain.setPassword(value as! String, forService: "comSicklesoftTRUBMT", account:key)
-                            }
-                        }
+//                        if let dict = response.data! as Data  {
+//                            for (key,value) in dict {
+//                                print("\(key) = \(value)")
+//                                keychain.set(value as! String, forKey: key, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
+//                                //SAMKeychain.setPassword(value as! String, forService: "comSicklesoftTRUBMT", account:key)
+//                            }
+//                        }
                 }
                 
                 performSegue(withIdentifier: "toRootViewController", sender: nil)

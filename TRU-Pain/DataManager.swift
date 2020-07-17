@@ -138,7 +138,10 @@ final class DataManager {
             }.resume()
         */
         
-        Alamofire.request(_url!).responseJSON(completionHandler: {
+        
+        
+        
+        /*AF.request(_url!).responseJSON(completionHandler: {
             response in
             let result = response.result
             if let dict = result.value as? JSONStandard {
@@ -287,7 +290,7 @@ final class DataManager {
 
             } //if let dictionaryends here
             
-        }) //alamofire ends here
+        }) //alamofire ends here */
         
         
     } //weather data for location ends here

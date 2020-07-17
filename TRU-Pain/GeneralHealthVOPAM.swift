@@ -32,7 +32,7 @@ struct GeneralHealthVOPAM: Assessment {
         let activity = OCKCarePlanActivity.assessment(withIdentifier: activityType.rawValue,
                                                       groupIdentifier: "Assessments",
                                                       title: title, text: summary,
-                                                      tintColor: Colors.green.color,
+                                                      tintColor: Colors.mediumBlue.color,
                                                       resultResettable: true,
                                                       schedule: schedule,
                                                       userInfo: nil,

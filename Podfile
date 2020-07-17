@@ -13,6 +13,7 @@ pod 'Firebase/Messaging'
 pod 'FirebaseDatabase'
 pod 'FirebaseStorage'
 pod 'Firebase/Firestore'
+
 # pod 'Parse'
 end
 

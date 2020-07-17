@@ -366,7 +366,7 @@ class RootViewController: UITabBarController {
         let viewController = vc.instantiateViewController(withIdentifier: "videoRecorderViewControllerSB")
         let homeUIBarButtonItem = UIBarButtonItem(image: UIImage(named: "gear.png"), style: .plain, target: self, action: #selector(RootViewController.toHome))
         viewController.navigationItem.leftBarButtonItem  = homeUIBarButtonItem
-        homeUIBarButtonItem.tintColor = Colors.careKitRed.color
+        homeUIBarButtonItem.tintColor = Colors.mintBlue.color
         // Setup the controller's title and tab bar item
         viewController.title = NSLocalizedString("Media", comment: "")
         viewController.tabBarItem = UITabBarItem(title: viewController.title, image: UIImage(named:"film-clap-board"), selectedImage: UIImage(named: "film-clap-board"))
@@ -379,7 +379,7 @@ class RootViewController: UITabBarController {
         let viewController = vc.instantiateViewController(withIdentifier: "locationStoryBoard")
         let homeUIBarButtonItem = UIBarButtonItem(image: UIImage(named: "gear.png"), style: .plain, target: self, action: #selector(RootViewController.toHome))
         viewController.navigationItem.leftBarButtonItem  = homeUIBarButtonItem
-        homeUIBarButtonItem.tintColor = Colors.careKitRed.color
+        homeUIBarButtonItem.tintColor = Colors.mintBlue.color
         // Setup the controller's title and tab bar item
         viewController.title = NSLocalizedString("Location", comment: "")
         viewController.tabBarItem = UITabBarItem(title: viewController.title, image: UIImage(named:"video"), selectedImage: UIImage(named: "video"))
@@ -393,7 +393,7 @@ class RootViewController: UITabBarController {
         let homeUIBarButtonItem = UIBarButtonItem(image: UIImage(named: "gear.png"), style: .plain, target: self, action: #selector(RootViewController.toHome))
         viewController.navigationItem.leftBarButtonItem  = homeUIBarButtonItem
         //viewController.maskImageTintColor = Colors.careKitRed.color
-        homeUIBarButtonItem.tintColor = Colors.careKitRed.color
+        homeUIBarButtonItem.tintColor = Colors.mintBlue.color
         // Setup the controller's title and tab bar item
         viewController.title = NSLocalizedString("Diary", comment: "")
         viewController.isSorted = false
@@ -409,7 +409,7 @@ class RootViewController: UITabBarController {
         let homeUIBarButtonItem = UIBarButtonItem(image: UIImage(named: "gear.png"), style: .plain, target: self, action: #selector(RootViewController.toHome))
         viewController.navigationItem.leftBarButtonItem  = homeUIBarButtonItem
         //viewController.maskImageTintColor = Colors.careKitRed.color
-        homeUIBarButtonItem.tintColor = Colors.careKitRed.color
+        homeUIBarButtonItem.tintColor = Colors.mintBlue.color
         // Setup the controller's title and tab bar item
         viewController.title = NSLocalizedString("VOPAM", comment: "")
         
@@ -424,9 +424,9 @@ class RootViewController: UITabBarController {
         viewController.delegate = self
         let homeUIBarButtonItem = UIBarButtonItem(image: UIImage(named: "gear.png"), style: .plain, target: self, action: #selector(RootViewController.toHome))
         viewController.navigationItem.leftBarButtonItem  = homeUIBarButtonItem
-        homeUIBarButtonItem.tintColor = Colors.careKitRed.color
+        homeUIBarButtonItem.tintColor = Colors.mintBlue.color
         //viewController.progressRingTintColor = Colors.careKitRed.color
-        viewController.navigationItem.rightBarButtonItem?.tintColor = Colors.careKitRed.color
+        viewController.navigationItem.rightBarButtonItem?.tintColor = Colors.mintBlue.color
         
         // Setup the controller's title and tab bar item
         viewController.title = NSLocalizedString("Health", comment: "")
@@ -442,7 +442,7 @@ class RootViewController: UITabBarController {
         let viewController = vc.instantiateViewController(withIdentifier: "StepsViewControllerSB")
         let homeUIBarButtonItem = UIBarButtonItem(image: UIImage(named: "gear.png"), style: .plain, target: self, action: #selector(RootViewController.toHome))
         viewController.navigationItem.leftBarButtonItem  = homeUIBarButtonItem
-        homeUIBarButtonItem.tintColor = Colors.careKitRed.color
+        homeUIBarButtonItem.tintColor = Colors.mintBlue.color
         // Setup the controller's title and tab bar item
         viewController.title = NSLocalizedString("Steps", comment: "")
         viewController.tabBarItem = UITabBarItem(title: viewController.title, image: UIImage(named:"_0002_icon_SingleHead"), selectedImage: UIImage(named: "_0002_icon_SingleHead"))
@@ -470,7 +470,7 @@ class RootViewController: UITabBarController {
         viewController.delegate = self
         let homeUIBarButtonItem = UIBarButtonItem(image: UIImage(named: "gear.png"), style: .plain, target: self, action: #selector(RootViewController.toHome))
         viewController.navigationItem.leftBarButtonItem  = homeUIBarButtonItem
-        homeUIBarButtonItem.tintColor = Colors.careKitRed.color
+        homeUIBarButtonItem.tintColor = Colors.mintBlue.color
         // Setup the controller's title and tab bar item
         viewController.title = NSLocalizedString("Connect", comment: "")
         viewController.tabBarItem = UITabBarItem(title: viewController.title, image: UIImage(named:"connect"), selectedImage: UIImage(named: "connect-filled"))
@@ -491,7 +491,7 @@ class RootViewController: UITabBarController {
         let homeUIBarButtonItem = UIBarButtonItem(image: UIImage(named: "gear.png"), style: .plain, target: self, action: #selector(RootViewController.toHome))
         viewController.navigationItem.leftBarButtonItem  = homeUIBarButtonItem
         
-        homeUIBarButtonItem.tintColor = Colors.careKitRed.color
+        homeUIBarButtonItem.tintColor = Colors.mintBlue.color
         // Setup the controller's title and tab bar item
         viewController.title = NSLocalizedString("Insights", comment: "")
         viewController.tabBarItem = UITabBarItem(title: viewController.title, image: UIImage(named:"insights"), selectedImage: UIImage(named: "insights-filled"))

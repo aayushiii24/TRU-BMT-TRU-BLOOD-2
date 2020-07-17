@@ -37,7 +37,7 @@ struct Meals: Assessment {
         let title = NSLocalizedString("Meals", comment: "")
         let summary = NSLocalizedString("Today", comment: "")
         
-        let activity = OCKCarePlanActivity.assessment(withIdentifier: activityType.rawValue, groupIdentifier: nil, title: title, text: summary, tintColor: Colors.beige.color, resultResettable: true, schedule: schedule, userInfo: nil, optional: false)
+        let activity = OCKCarePlanActivity.assessment(withIdentifier: activityType.rawValue, groupIdentifier: nil, title: title, text: summary, tintColor: Colors.mediumBlue.color, resultResettable: true, schedule: schedule, userInfo: nil, optional: false)
         
         
 //        (withIdentifier: activityType.rawValue, groupIdentifier: "Assessment", title: title, text: summary, tintColor: Colors.green.color, resultResettable: true, schedule: schedule, userInfo: nil
@@ -60,7 +60,7 @@ struct Meals: Assessment {
         let formItemBreakfastStatusSection = ORKFormItem(sectionTitle: " ") ////////// SECTION
         
         
-        let breakfastStatusQuestionStepTitle = "How much of your breakfast did you eat?"
+        let breakfastStatusQuestionStepTitle = "How much of your breakfast did you eat yesterday?"
         let breakfastStatusTextChoices = [
             ORKTextChoice(text: "Not Applicable", value: "100" as NSCoding & NSCopying & NSObjectProtocol),
             ORKTextChoice(text: "0. None", value: "0" as NSCoding & NSCopying & NSObjectProtocol),
@@ -81,7 +81,7 @@ struct Meals: Assessment {
         let formItemLunchStatusSection = ORKFormItem(sectionTitle: " ") ////////// SECTION
         
         
-        let lucnhStatusQuestionStepTitle = "How much of your lunch did you eat?"
+        let lucnhStatusQuestionStepTitle = "How much of your lunch did you eat yesterday?"
         let lucnhStatusTextChoices = [
             
             ORKTextChoice(text: "Not Applicable", value: "100" as NSCoding & NSCopying & NSObjectProtocol),
@@ -103,7 +103,7 @@ struct Meals: Assessment {
         let formItemDinnerStatusSection = ORKFormItem(sectionTitle: " ") ////////// SECTION
         
         
-        let dinnerStatusQuestionStepTitle = "How much of your dinner did you eat?"
+        let dinnerStatusQuestionStepTitle = "How much of your dinner did you eat yesterday?"
         let dinnerStatusTextChoices = [
             ORKTextChoice(text: "Not Applicable", value: "100" as NSCoding & NSCopying & NSObjectProtocol),
             ORKTextChoice(text: "0. None", value: "0" as NSCoding & NSCopying & NSObjectProtocol),

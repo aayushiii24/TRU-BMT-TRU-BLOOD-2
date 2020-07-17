@@ -66,7 +66,7 @@ struct SymptomFocus: Assessment {
         
         
         
-        let symptomArray: Array = manager.getArrayFor(string: "Symptoms")
+        let symptomArray: Array = ["headache", "cough"] //manager.getArrayFor(string: "Symptoms")
         var choices:[ORKTextChoice] = []
         for item in symptomArray {
             let textString = item

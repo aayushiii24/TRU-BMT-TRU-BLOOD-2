@@ -28,7 +28,7 @@ struct StoolConsistency: Assessment {
         let summary = NSLocalizedString("Today", comment: "")
         
         
-        let activity = OCKCarePlanActivity.assessment(withIdentifier: activityType.rawValue, groupIdentifier: nil, title: title, text: summary, tintColor: Colors.blue.color, resultResettable: true, schedule: schedule, userInfo: nil, thresholds: nil, optional: false
+        let activity = OCKCarePlanActivity.assessment(withIdentifier: activityType.rawValue, groupIdentifier: nil, title: title, text: summary, tintColor: Colors.mediumBlue.color, resultResettable: true, schedule: schedule, userInfo: nil, thresholds: nil, optional: false
         )
         
         
