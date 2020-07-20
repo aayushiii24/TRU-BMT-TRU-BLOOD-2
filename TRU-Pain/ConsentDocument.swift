@@ -12,7 +12,21 @@ import ResearchKit
 public var ConsentDocument: ORKConsentDocument {
   
   let consentDocument = ORKConsentDocument()
-  consentDocument.title = "Example Consent"
+  consentDocument.title = NSLocalizedString("Study Consent Form", comment: "")
+
+    let section1 = ORKConsentSection(type: .overview)
+  section1.summary = NSLocalizedString("Section 1 Summary", comment: "")
+  section1.content = NSLocalizedString("Section 1 Content…", comment: "")
+
+    let section2 = ORKConsentSection(type: .dataGathering)
+  section2.summary = NSLocalizedString("Section 2 Summary", comment: "")
+  section2.content = NSLocalizedString("Section 2 Content…", comment: "")
+
+    let section3 = ORKConsentSection(type: .privacy)
+  section3.summary = NSLocalizedString("Section 3 Summary", comment: "")
+  section3.content = NSLocalizedString("Section 3 Content…", comment: "")
+
+  consentDocument.sections = [section1, section2, section3]
   
   let consentSectionTypes: [ORKConsentSectionType] = [
     .overview,
