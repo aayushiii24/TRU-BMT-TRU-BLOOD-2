@@ -20,7 +20,7 @@ struct Proteins: Activity {
     func carePlanActivity() -> OCKCarePlanActivity {
         // Create a weekly schedule.
         let startDate = DateComponents(year: 2016, month: 01, day: 01)
-        let schedule = OCKCareSchedule.weeklySchedule(withStartDate: startDate as DateComponents, occurrencesOnEachDay: [3, 3, 3, 3, 3, 3, 3])
+        let schedule = OCKCareSchedule.weeklySchedule(withStartDate: startDate as DateComponents, occurrencesOnEachDay: [5, 5, 5, 5, 5, 5, 5])
         
         // Get the localized strings to use for the activity.
         let title = NSLocalizedString("Proteins", comment: "")

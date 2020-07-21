@@ -1,0 +1,23 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "AAC3729488C2EB17A6A66E656FB9A14EBE1BC493",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "AAC3729488C2EB17A6A66E656FB9A14EBE1BC493" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "652948C3-BBC9-4552-B6A3-CC64DA059340",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "AAC3729488C2EB17A6A66E656FB9A14EBE1BC493" : "TRU-BMT-TRU-BLOOD%202\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "TRU-BMT copy",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "TRU-BMT copy.xcworkspace",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/scdi\/TRU-BMT_II.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "AAC3729488C2EB17A6A66E656FB9A14EBE1BC493"
+    }
+  ]
+}

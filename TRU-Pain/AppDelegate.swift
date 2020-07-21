@@ -13,6 +13,7 @@ import CoreData
 import UserNotifications
 import Firebase
 import HealthKit
+import ResearchKit
 
 //import AlamofireNetworkActivityIndicator
 
