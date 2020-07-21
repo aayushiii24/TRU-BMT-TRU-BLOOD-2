@@ -1,17 +1,14 @@
 {
   "images" : [
     {
-      "filename" : "BMT Logo Option 04_1@4x.png.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "BMT Logo Option 04_1@4x.png@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "BMT Logo Option 04_1@4x.png@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }
