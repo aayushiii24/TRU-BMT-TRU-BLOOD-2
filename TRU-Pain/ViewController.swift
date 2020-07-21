@@ -12,12 +12,19 @@ import Alamofire
 import UserNotifications
 import Firebase
 import FirebaseInstanceID
+import ResearchKit
 
 //import GoogleSignIn
 
 
-class ViewController: UIViewController  //GIDSignInUIDelegate
-{
+class ViewController: UIViewController {
+    
+    @IBAction func consentTapped(sender : UIButton) {
+        let taskViewController = ORKTaskViewController(task: ConsentTask, taskRun: nil)
+        taskViewController.delegate = self
+        present(taskViewController, animated: true, completion: nil)
+    }
+
     var db: Firestore!
     var studyName: String?
     var study: String?
@@ -127,8 +134,6 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
     //
     //    }
     //
-    
-    
     
     
     func registrationFailed()  {
@@ -545,9 +550,14 @@ class ViewController: UIViewController  //GIDSignInUIDelegate
         
     }
     
-    
-    
 }
+
+extension ViewController : ORKTaskViewControllerDelegate {
+    func taskViewController(_ taskViewController: ORKTaskViewController, didFinishWith reason: ORKTaskViewControllerFinishReason, error: Error?) {
+        taskViewController.dismiss(animated: true, completion: nil)
+    }
+}
+
 
 
 

@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14133" systemVersion="17E199" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Care" representedClassName="Care" syncable="YES" codeGenerationType="class">
+        <attribute name="birthYear" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="gender" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="initials" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="institution" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="reminder" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="study" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="DAppetite" representedClassName="DAppetite" syncable="YES" codeGenerationType="class">
+        <attribute name="appetiteTotal" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="breakfast" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="dayString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="dinner" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="lunch" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="metric" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="participantID" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="taskRunUUID" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="timestampEnd" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="timestampEndString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="timestampString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+    </entity>
+    <entity name="DEvent" representedClassName="DEvent" syncable="YES" codeGenerationType="class">
+        <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="dateString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="jsonString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="method" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="metric" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="participantID" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="taskRunUUID" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="timestampString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="value" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="DGeneralHealth" representedClassName="DGeneralHealth" syncable="YES" codeGenerationType="class">
+        <attribute name="activityLimitation" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="date" optional="YES" attributeType="Date" defaultDateTimeInterval="-31525980" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="dateString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="dayString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="fatigue" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="generalHealth" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="generalHealthComparison" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="metric" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="mood" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="participantID" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="sleepHours" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="sleepQuality" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="stress" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="symptomInterference" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="taskRunUUID" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="Date" defaultDateTimeInterval="-31525920" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="timestampEnd" optional="YES" attributeType="Date" defaultDateTimeInterval="-31525920" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="timestampEndString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="timestampString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+    </entity>
+    <entity name="DGeoData" representedClassName="DGeoData" syncable="YES" codeGenerationType="class">
+        <attribute name="altitude" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="apparentTemperature" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="apparentTemperatureMax" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="apparentTemperatureMin" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="cloudCover" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="currentWeatherTimestampString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="dailySummary" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="dewPoint" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="humidity" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="icon" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="latitude" optional="YES" attributeType="Double" defaultValueString="-999" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="longitude" optional="YES" attributeType="Double" defaultValueString="-999" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="moonPhase" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="ozone" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="participantID" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="pressure" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="summary" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="sunriseTimeString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="sunsetTimeTimeString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="taskUUID" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="temperature" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="Date" defaultDateTimeInterval="-31525980" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="timestampString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="visibility" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="windSpeed" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+    </entity>
+    <entity name="DGeospatial" representedClassName="DGeospatial" syncable="YES" codeGenerationType="class">
+        <attribute name="altitude" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="apparentTemperature" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="cloudCover" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="dewPoint" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="humidity" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="icon" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="latitude" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="longitude" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="ozone" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="precipIntensity" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="precipProbability" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="pressure" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="summary" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="taskUUID" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="temperature" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="timestampString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="visibility" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="windSpeed" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+    </entity>
+    <entity name="DMenstruation" representedClassName="DMenstruation" syncable="YES" codeGenerationType="class">
+        <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="dateString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="dayString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="differentiatesPain" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="differentiatesSCDPainCharacter" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="firstMorningUrine" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="lowerAbdominalCramp" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="menstruating" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="pad01" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="pad02" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="pad03" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="participantID" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="spotting" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="tampon01" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="tampon02" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="tampon03" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="taskRunUUID" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="timestampEnd" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="timestampEndString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="timestampString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+    </entity>
+    <entity name="DscdPain" representedClassName="DscdPain" syncable="YES" codeGenerationType="class">
+        <attribute name="bodyLocations" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="date" optional="YES" attributeType="Date" defaultDateTimeInterval="-31526280" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="dateString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="dayString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="metric" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="nonscdPain" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="participantID" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="scdPain" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="scdPainStatus" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="taskRunUUID" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="Date" defaultDateTimeInterval="-31569480" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="timestampEnd" optional="YES" attributeType="Date" defaultDateTimeInterval="-31526220" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="timestampEndString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="timestampString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+    </entity>
+    <entity name="DStool" representedClassName="DStool" syncable="YES" codeGenerationType="class">
+        <attribute name="date" optional="YES" attributeType="Date" defaultDateTimeInterval="-31526220" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="dateString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="dayString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="diarrheaEpisodes" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="participantID" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="particpantID" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="stools" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="taskRunUUID" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="Date" defaultDateTimeInterval="-31526220" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="timestampEnd" optional="YES" attributeType="Date" defaultDateTimeInterval="-31526160" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="timestampEndString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="timestampString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="type1" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="type2" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="type3" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="type4" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="type5" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="type6" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="type7" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="DSymptomFocus" representedClassName="DSymptomFocus" syncable="YES" codeGenerationType="class">
+        <attribute name="date" optional="YES" attributeType="Date" defaultDateTimeInterval="-31526160" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="dateString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="dayString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="intensity" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="interventions" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="metric" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="otherInterventions" optional="YES" attributeType="String" defaultValueString="NA" syncable="YES"/>
+        <attribute name="participantID" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="status" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="taskRunUUID" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="Date" defaultDateTimeInterval="-31526100" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="timestampEnd" optional="YES" attributeType="Date" defaultDateTimeInterval="-31526100" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="timestampEndString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="timestampString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="triggers" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+    </entity>
+    <entity name="DTemperature" representedClassName="DTemperature" syncable="YES" codeGenerationType="class">
+        <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="dateString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="dayString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="intensity" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="method" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="metric" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="participantID" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="taskRunUUID" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="Date" defaultDateTimeInterval="-31526040" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="timestampEnd" optional="YES" attributeType="Date" defaultDateTimeInterval="-31526040" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="timestampEndString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+        <attribute name="timestampString" optional="YES" attributeType="String" defaultValueString="UNK" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="Care" positionX="9" positionY="162" width="128" height="135"/>
+        <element name="DAppetite" positionX="54" positionY="99" width="128" height="225"/>
+        <element name="DEvent" positionX="-36" positionY="9" width="128" height="210"/>
+        <element name="DGeneralHealth" positionX="18" positionY="63" width="128" height="330"/>
+        <element name="DGeoData" positionX="27" positionY="72" width="128" height="420"/>
+        <element name="DGeospatial" positionX="27" positionY="72" width="128" height="330"/>
+        <element name="DMenstruation" positionX="9" positionY="54" width="128" height="360"/>
+        <element name="DscdPain" positionX="36" positionY="81" width="128" height="255"/>
+        <element name="DStool" positionX="0" positionY="45" width="128" height="330"/>
+        <element name="DSymptomFocus" positionX="54" positionY="99" width="128" height="285"/>
+        <element name="DTemperature" positionX="45" positionY="90" width="128" height="240"/>
+    </elements>
+</model>
